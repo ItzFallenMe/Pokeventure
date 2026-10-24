@@ -24,8 +24,7 @@ class TypeOrb extends StatefulWidget {
   State<TypeOrb> createState() => _TypeOrbState();
 }
 
-class _TypeOrbState extends State<TypeOrb>
-    with SingleTickerProviderStateMixin {
+class _TypeOrbState extends State<TypeOrb> with SingleTickerProviderStateMixin {
   late final AnimationController _pulse = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 2600),
@@ -88,9 +87,7 @@ class _TypeOrbState extends State<TypeOrb>
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Positioned.fill(
-                child: CustomPaint(painter: _PokeballPainter()),
-              ),
+              Positioned.fill(child: CustomPaint(painter: _PokeballPainter())),
               if (widget.shiny)
                 Positioned(
                   top: size * 0.05,

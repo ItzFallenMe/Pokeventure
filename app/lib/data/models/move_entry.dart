@@ -14,8 +14,9 @@ class MoveEntry {
   factory MoveEntry.fromJson(Map<String, dynamic> json) {
     return MoveEntry(
       name: json['name'] as String,
-      type: PokemonType.values.asNameMap()[
-              (json['type'] as String).toLowerCase()] ??
+      type:
+          PokemonType.values.asNameMap()[(json['type'] as String)
+              .toLowerCase()] ??
           PokemonType.normal,
       category: json['category'] as String? ?? 'Status',
       power: (json['power'] as num?)?.toInt() ?? 0,

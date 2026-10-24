@@ -88,12 +88,7 @@ class CurrencyChip extends StatelessWidget {
 }
 
 class PillBadge extends StatelessWidget {
-  const PillBadge({
-    super.key,
-    required this.label,
-    this.icon,
-    this.color,
-  });
+  const PillBadge({super.key, required this.label, this.icon, this.color});
 
   final String label;
   final IconData? icon;

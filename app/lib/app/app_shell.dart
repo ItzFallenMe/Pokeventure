@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/battle/battle_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/more/more_screen.dart';
 import '../features/party/party_screen.dart';
 import '../features/social/social_screen.dart';
+import '../state/theme_provider.dart';
 import '../ui/tokens/layout.dart';
 
-class AppShell extends StatefulWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
 
   @override
-  State<AppShell> createState() => _AppShellState();
+  ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> {
+class _AppShellState extends ConsumerState<AppShell> {
   int _index = 0;
 
   late final List<Widget> _pages = [
@@ -27,6 +29,7 @@ class _AppShellState extends State<AppShell> {
 
   void _select(int index) {
     if (index == _index) return;
+    ref.read(soundServiceProvider).tap();
     setState(() => _index = index);
   }
 
@@ -49,36 +52,47 @@ class _AppShellState extends State<AppShell> {
         },
         child: KeyedSubtree(key: ValueKey(_index), child: _pages[_index]),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: _select,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Home',
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: Theme.of(
+                context,
+              ).colorScheme.outlineVariant.withValues(alpha: 0.45),
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.catching_pokemon_outlined),
-            selectedIcon: Icon(Icons.catching_pokemon_rounded),
-            label: 'Party',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.sports_mma_outlined),
-            selectedIcon: Icon(Icons.sports_mma_rounded),
-            label: 'Battle',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.groups_outlined),
-            selectedIcon: Icon(Icons.groups_rounded),
-            label: 'Social',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.grid_view_outlined),
-            selectedIcon: Icon(Icons.grid_view_rounded),
-            label: 'More',
-          ),
-        ],
+        ),
+        child: NavigationBar(
+          selectedIndex: _index,
+          onDestinationSelected: _select,
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.catching_pokemon_outlined),
+              selectedIcon: Icon(Icons.catching_pokemon_rounded),
+              label: 'Party',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.sports_mma_outlined),
+              selectedIcon: Icon(Icons.sports_mma_rounded),
+              label: 'Battle',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.groups_outlined),
+              selectedIcon: Icon(Icons.groups_rounded),
+              label: 'Social',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.grid_view_outlined),
+              selectedIcon: Icon(Icons.grid_view_rounded),
+              label: 'More',
+            ),
+          ],
+        ),
       ),
     );
   }

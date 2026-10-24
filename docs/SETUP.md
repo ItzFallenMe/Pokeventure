@@ -183,6 +183,28 @@ Keep this terminal open. `Ctrl+C` stops the server.
 
 ## 6. Run the app
 
+### Configure it with an env file (recommended)
+
+The app reads its settings from `--dart-define` values, which you can keep in a
+local `.env` file instead of typing them on every build:
+
+```bash
+cd app
+cp .env.example .env
+```
+
+Open `.env` and set at least `API_BASE_URL`. Add `SUPABASE_URL` and
+`SUPABASE_ANON_KEY` if you want Social. Then:
+
+```bash
+flutter run --dart-define-from-file=.env
+```
+
+`.env` is git-ignored, so keys never end up in the repository. The anon key is
+public by design; never paste a Supabase **service-role** key into the app.
+Without a `.env` file the app falls back to the emulator/localhost server
+addresses below.
+
 ### Android emulator
 
 1. Open Android Studio → **Device Manager** → create a Pixel device with a
@@ -204,11 +226,12 @@ computer.
 3. Find your computer's LAN IP:
    - Windows: `ipconfig` → IPv4 address
    - macOS/Linux: `ifconfig` or `ip addr`
-4. Run with that address:
+4. Set `API_BASE_URL=http://192.168.1.50:8787` in `.env`, then:
    ```bash
    cd app
-   flutter run --dart-define=API_BASE_URL=http://192.168.1.50:8787
+   flutter run --dart-define-from-file=.env
    ```
+   (or pass it directly: `flutter run --dart-define=API_BASE_URL=http://192.168.1.50:8787`).
 
 The phone and computer must be on the same Wi-Fi. If the Battle tab cannot
 connect, open `http://192.168.1.50:8787/health` in the phone's browser; if that
@@ -216,13 +239,21 @@ fails, fix the firewall or network first.
 
 ### First run checklist in the app
 
-1. **Home** shows a featured spawn.
-2. Tap it → **Catch** opens → throw a ball → the Pokémon joins the party or PC.
-3. **Party** lists six members; drag one to change the lead.
-4. **Dex** shows 1,025 species and filters.
-5. **Battle → Random battle** creates an AI battle and shows four moves.
-6. **Shop** buys a Poké Ball and the **Bag** count goes up.
-7. Force-quit and reopen: party, coins, bag and theme persist.
+1. **Welcome** asks for a trainer name and a starter. Pick one — you land on
+   Home with a real level-5 partner.
+2. **Home** shows the daily Pokémon, daily gift, quests and your party.
+3. **Explore the zones → Catch now** rolls a real catch; the ball is consumed,
+   the Pokémon joins the party or PC, and the Pokédex updates.
+4. **Party** shows your collection; the PC starts empty and fills when the
+   party is full.
+5. **Pokédex** contains 1,025 species with descriptions, catch rates and
+   evolutions.
+6. **Battle → Battle AI** creates a real Showdown battle and shows four moves;
+   finishing it pays coins and XP.
+7. **Shop** buys a Poké Ball and the **Bag** count goes up.
+8. **More → Settings** changes accent, avatar, title, theme, music and sound.
+9. Force-quit and reopen: trainer, party, coins, bag, quests and settings
+   persist.
 
 ---
 
@@ -397,4 +428,5 @@ cd ../..
 ```
 
 This keeps your local save on the phone. To reset game progress use
-**More → Settings → Reset local save**.
+**More → Settings → New game** (it clears the save and returns to starter
+selection).

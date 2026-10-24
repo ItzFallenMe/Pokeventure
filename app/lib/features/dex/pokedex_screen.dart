@@ -5,6 +5,7 @@ import '../../data/dex_repository.dart';
 import '../../data/models/dex_entry.dart';
 import '../../data/models/pokemon_type.dart';
 import '../../ui/tokens/layout.dart';
+import '../../ui/theme/app_theme.dart';
 import '../../ui/tokens/type_palette.dart';
 import '../../ui/widgets/pokemon_sprite.dart';
 import '../../ui/widgets/type_chip.dart';
@@ -46,12 +47,10 @@ class _PokedexScreenState extends ConsumerState<PokedexScreen> {
     final scheme = theme.colorScheme;
     final dex = ref.watch(dexProvider);
     final owned = ref.watch(ownedDexProvider);
+    final seen = ref.watch(seenDexProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pokédex'),
-        scrolledUnderElevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Pokédex'), scrolledUnderElevation: 0),
       body: Column(
         children: [
           Padding(
@@ -93,7 +92,10 @@ class _PokedexScreenState extends ConsumerState<PokedexScreen> {
             child: SegmentedButton<_OwnedFilter>(
               segments: const [
                 ButtonSegment(value: _OwnedFilter.all, label: Text('All')),
-                ButtonSegment(value: _OwnedFilter.caught, label: Text('Caught')),
+                ButtonSegment(
+                  value: _OwnedFilter.caught,
+                  label: Text('Caught'),
+                ),
                 ButtonSegment(
                   value: _OwnedFilter.missing,
                   label: Text('Missing'),
@@ -148,25 +150,64 @@ class _PokedexScreenState extends ConsumerState<PokedexScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              0,
+              AppSpacing.lg,
+              AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(99),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: owned.length / 1025),
+                      duration: const Duration(milliseconds: 800),
+                      curve: Curves.easeOutCubic,
+                      builder: (context, value, _) => LinearProgressIndicator(
+                        value: value,
+                        minHeight: 6,
+                        backgroundColor: scheme.surfaceContainerHighest,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  '${(owned.length / 1025 * 100).toStringAsFixed(1)}% complete',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: dex.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Center(
-                child: Text('Could not load the dex.\n$error', textAlign: TextAlign.center),
+                child: Text(
+                  'Could not load the dex.\n$error',
+                  textAlign: TextAlign.center,
+                ),
               ),
               data: (entries) {
-                final filtered = entries.where((entry) {
-                  if (!entry.matches(_query)) return false;
-                  if (_type != null && !entry.types.contains(_type)) {
-                    return false;
-                  }
-                  final isOwned = owned.contains(entry.number);
-                  return switch (_owned) {
-                    _OwnedFilter.all => true,
-                    _OwnedFilter.caught => isOwned,
-                    _OwnedFilter.missing => !isOwned,
-                  };
-                }).toList(growable: false);
+                final filtered = entries
+                    .where((entry) {
+                      if (!entry.matches(_query)) return false;
+                      if (_type != null && !entry.types.contains(_type)) {
+                        return false;
+                      }
+                      final isOwned = owned.contains(entry.number);
+                      return switch (_owned) {
+                        _OwnedFilter.all => true,
+                        _OwnedFilter.caught => isOwned,
+                        _OwnedFilter.missing => !isOwned,
+                      };
+                    })
+                    .toList(growable: false);
 
                 if (filtered.isEmpty) {
                   return Center(
@@ -179,7 +220,10 @@ class _PokedexScreenState extends ConsumerState<PokedexScreen> {
                           color: scheme.onSurfaceVariant,
                         ),
                         const SizedBox(height: AppSpacing.sm),
-                        Text('No species match', style: theme.textTheme.titleMedium),
+                        Text(
+                          'No species match',
+                          style: theme.textTheme.titleMedium,
+                        ),
                         TextButton(
                           onPressed: _clearFilters,
                           child: const Text('Clear filters'),
@@ -226,17 +270,18 @@ class _PokedexScreenState extends ConsumerState<PokedexScreen> {
                         ),
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: AppSpacing.sm,
-                          crossAxisSpacing: AppSpacing.sm,
-                          childAspectRatio: 1.55,
-                        ),
+                              crossAxisCount: 2,
+                              mainAxisSpacing: AppSpacing.sm,
+                              crossAxisSpacing: AppSpacing.sm,
+                              childAspectRatio: 1.55,
+                            ),
                         itemCount: filtered.length,
                         itemBuilder: (context, index) {
                           final entry = filtered[index];
                           return _DexCard(
                             entry: entry,
                             owned: owned.contains(entry.number),
+                            seen: seen.contains(entry.number),
                             onTap: () => showDexEntrySheet(
                               context,
                               entry,
@@ -261,11 +306,13 @@ class _DexCard extends StatelessWidget {
   const _DexCard({
     required this.entry,
     required this.owned,
+    required this.seen,
     required this.onTap,
   });
 
   final DexEntry entry;
   final bool owned;
+  final bool seen;
   final VoidCallback onTap;
 
   @override
@@ -306,10 +353,14 @@ class _DexCard extends StatelessWidget {
                         Icon(
                           owned
                               ? Icons.check_circle_rounded
+                              : seen
+                              ? Icons.visibility_rounded
                               : Icons.radio_button_unchecked,
                           size: 14,
                           color: owned
-                              ? scheme.tertiary
+                              ? AppTheme.teal
+                              : seen
+                              ? scheme.primary
                               : scheme.outlineVariant,
                         ),
                       ],
