@@ -105,7 +105,7 @@ red errors for Android tooling. Warnings about Chrome/iOS are fine.
 The Showdown engine is a git submodule, so ask Git to fetch it too:
 
 ```bash
-git clone --recurse-submodules https://github.com/iwannabeyourshere/PokeNext.git
+git clone --recurse-submodules https://github.com/ItzFallenMe/Pokeventure.git
 cd PokeNext
 ```
 

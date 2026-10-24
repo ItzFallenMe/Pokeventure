@@ -24,7 +24,7 @@ Everything you need, from a clean machine to a server your friends can play on.
 ## The short version
 
 ```bash
-git clone --recurse-submodules https://github.com/iwannabeyourshere/PokeNext.git
+git clone --recurse-submodules https://github.com/ItzFallenMe/Pokeventure.git
 cd PokeNext
 ./scripts/bootstrap.sh
 

@@ -128,7 +128,7 @@ If you are deploying before the latest work is on `main`, set
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `POKEVENTURE_REPO_URL` | `https://github.com/iwannabeyourshere/PokeNext.git` | Repository to clone |
+| `POKEVENTURE_REPO_URL` | `https://github.com/ItzFallenMe/Pokeventure.git` | Repository to clone |
 | `POKEVENTURE_REPO_BRANCH` | `main` | Branch to clone |
 | `POKEVENTURE_REPO_DIR` | `PokeNext` next to `index.js` | Clone destination |
 
@@ -212,7 +212,7 @@ resources are not billed.
 3. Clone with the engine and bootstrap:
 
    ```bash
-   git clone --recurse-submodules https://github.com/iwannabeyourshere/PokeNext.git
+   git clone --recurse-submodules https://github.com/ItzFallenMe/Pokeventure.git
    cd PokeNext
    ./scripts/bootstrap.sh
    ```

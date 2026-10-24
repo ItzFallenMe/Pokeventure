@@ -7,8 +7,8 @@ six, add friends with a QR code, and battle them on two phones.
 
 Created and maintained by **[ItzFallenMe](https://github.com/ItzFallenMe)**.
 
-[![APK](https://github.com/iwannabeyourshere/PokeNext/actions/workflows/apk.yml/badge.svg)](https://github.com/iwannabeyourshere/PokeNext/actions/workflows/apk.yml)
-[![Server](https://github.com/iwannabeyourshere/PokeNext/actions/workflows/server.yml/badge.svg)](https://github.com/iwannabeyourshere/PokeNext/actions/workflows/server.yml)
+[![APK](https://github.com/ItzFallenMe/Pokeventure/actions/workflows/apk.yml/badge.svg)](https://github.com/ItzFallenMe/Pokeventure/actions/workflows/apk.yml)
+[![Server](https://github.com/ItzFallenMe/Pokeventure/actions/workflows/server.yml/badge.svg)](https://github.com/ItzFallenMe/Pokeventure/actions/workflows/server.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -89,7 +89,7 @@ default to Node 18; pick a Node 22 image (see [Wispbyte](#wispbyte-also-good-for
 ## Quick start (local)
 
 ```bash
-git clone --recurse-submodules https://github.com/iwannabeyourshere/PokeNext.git
+git clone --recurse-submodules https://github.com/ItzFallenMe/Pokeventure.git
 cd PokeNext
 ./scripts/bootstrap.sh
 ```

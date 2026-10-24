@@ -22,7 +22,7 @@ const path = require('node:path');
 const bootstrapDir = __dirname;
 const repoUrl =
   process.env.POKEVENTURE_REPO_URL ||
-  'https://github.com/iwannabeyourshere/PokeNext.git';
+  'https://github.com/ItzFallenMe/Pokeventure.git';
 const repoBranch = process.env.POKEVENTURE_REPO_BRANCH || 'main';
 const repoDir = process.env.POKEVENTURE_REPO_DIR
   ? path.resolve(bootstrapDir, process.env.POKEVENTURE_REPO_DIR)

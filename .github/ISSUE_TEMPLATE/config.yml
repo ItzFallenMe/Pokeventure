@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Setup and hosting questions
-    url: https://github.com/iwannabeyourshere/PokeNext/blob/main/docs/SETUP.md
+    url: https://github.com/ItzFallenMe/Pokeventure/blob/main/docs/SETUP.md
     about: Clean-machine setup, phone builds and troubleshooting live in the setup guide.
   - name: Security report
-    url: https://github.com/iwannabeyourshere/PokeNext/security/policy
+    url: https://github.com/ItzFallenMe/Pokeventure/security/policy
     about: Please report vulnerabilities privately, not in a public issue.

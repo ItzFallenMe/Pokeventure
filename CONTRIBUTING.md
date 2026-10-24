@@ -15,7 +15,7 @@ requests are very welcome.
 ## Development loop
 
 ```bash
-git clone --recurse-submodules https://github.com/iwannabeyourshere/PokeNext.git
+git clone --recurse-submodules https://github.com/ItzFallenMe/Pokeventure.git
 cd PokeNext
 ./scripts/bootstrap.sh
 
