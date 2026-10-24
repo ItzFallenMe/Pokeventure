@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/battle_api.dart';
-import '../../state/party_provider.dart';
+import '../../state/theme_provider.dart';
+import '../../state/trainer_provider.dart';
 import '../../ui/theme/app_theme.dart';
 import '../../ui/tokens/layout.dart';
 import '../../ui/widgets/common.dart';
@@ -31,16 +32,37 @@ class _BattleScreenState extends ConsumerState<BattleScreen> {
     setState(() => _queueing = true);
 
     try {
+      final sound = ref.read(soundServiceProvider);
+      sound.tap();
       final snapshot = await ref
           .read(battleApiProvider)
           .createBattle(format: _formats[_format].$2);
       if (!mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute<void>(
+      final won = await Navigator.of(context).push<bool>(
+        MaterialPageRoute<bool>(
           builder: (_) => BattleArenaScreen(initial: snapshot),
         ),
       );
+      if (!mounted || won == null) return;
+      ref.read(trainerProvider.notifier).gainBattleRewards(won: won);
+      if (won) {
+        sound.success();
+      } else {
+        sound.failure();
+      }
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              won
+                  ? 'Battle won · +180 coins · +140 trainer XP'
+                  : 'Battle lost · +40 coins · +30 trainer XP',
+            ),
+          ),
+        );
     } on BattleApiException catch (error) {
+      ref.read(soundServiceProvider).error();
       if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
@@ -61,7 +83,7 @@ class _BattleScreenState extends ConsumerState<BattleScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final party = ref.watch(partyProvider).party;
+    final party = ref.watch(trainerProvider).party;
 
     return SafeArea(
       bottom: false,

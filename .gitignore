@@ -29,3 +29,6 @@ Thumbs.db
 .idea/
 .vscode/
 .freebuff/
+
+# Build-time downloads for the data generator
+tools/.cache/

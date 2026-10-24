@@ -1,38 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../state/party_provider.dart';
+import '../../app/credits.dart';
+import '../../state/theme_provider.dart';
+import '../../state/trainer_provider.dart';
+import '../../ui/motion/motion.dart';
+import '../../ui/theme/app_theme.dart';
+import '../../ui/tokens/avatars.dart';
 import '../../ui/tokens/layout.dart';
 import '../../ui/widgets/common.dart';
 import '../bag/bag_screen.dart';
 import '../dex/pokedex_screen.dart';
+import '../explore/explore_screen.dart';
 import '../shop/shop_screen.dart';
 import 'settings_screen.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
 
+  void _push(BuildContext context, Widget screen) {
+    Navigator.of(context).push(AppPageRoute(builder: (_) => screen));
+  }
+
   void _soon(BuildContext context, String feature) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(content: Text('$feature ships in the next milestone.')),
+        SnackBar(
+          content: Text('$feature is on the roadmap after the core loop.'),
+        ),
       );
-  }
-
-  void _push(BuildContext context, Widget screen) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => screen),
-    );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final state = ref.watch(partyProvider);
-    final itemCount =
-        state.inventory.values.fold<int>(0, (sum, count) => sum + count);
+    final trainer = ref.watch(trainerProvider);
+    final settings = ref.watch(settingsProvider);
 
     return SafeArea(
       bottom: false,
@@ -46,48 +51,92 @@ class MoreScreen extends ConsumerWidget {
         children: [
           StaggeredEntrance(
             index: 0,
-            child: Text('More', style: theme.textTheme.displaySmall),
+            child: Row(
+              children: [
+                Text('More', style: theme.textTheme.displaySmall),
+                const Spacer(),
+                IconButton.filledTonal(
+                  tooltip: 'Settings',
+                  onPressed: () => _push(context, const SettingsScreen()),
+                  icon: const Icon(Icons.settings_rounded, size: 20),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           StaggeredEntrance(
             index: 1,
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 26,
-                      backgroundColor: scheme.primaryContainer,
-                      child: Text(
-                        'TR',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          color: scheme.onPrimaryContainer,
-                        ),
-                      ),
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                gradient: AppTheme.heroGradient(theme.brightness),
+                boxShadow: [
+                  BoxShadow(
+                    color: scheme.primary.withValues(alpha: 0.28),
+                    blurRadius: 26,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.white.withValues(alpha: 0.18),
+                    child: Icon(
+                      trainerAvatarIcon(settings.avatar),
+                      color: Colors.white,
+                      size: 26,
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Trainer', style: theme.textTheme.titleLarge),
-                          Text(
-                            'Level 24 · Season 1 · ${state.caught} caught',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          trainer.name,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
                           ),
-                        ],
-                      ),
+                        ),
+                        Text(
+                          '${settings.title} · Level ${trainer.level} · '
+                          '${trainer.caughtCount} caught',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.82),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(99),
+                          child: TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0, end: trainer.levelProgress),
+                            duration: AppMotion.slow,
+                            builder: (context, value, _) =>
+                                LinearProgressIndicator(
+                                  value: value,
+                                  minHeight: 5,
+                                  backgroundColor: Colors.white.withValues(
+                                    alpha: 0.22,
+                                  ),
+                                  valueColor: const AlwaysStoppedAnimation(
+                                    AppTheme.gold,
+                                  ),
+                                ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const PillBadge(
-                      label: 'Great Ball',
-                      icon: Icons.workspace_premium_rounded,
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  PillBadge(
+                    label: '${trainer.streak}d streak',
+                    icon: Icons.local_fire_department_rounded,
+                    color: AppTheme.gold,
+                  ),
+                ],
               ),
             ),
           ),
@@ -95,96 +144,134 @@ class MoreScreen extends ConsumerWidget {
           StaggeredEntrance(
             index: 2,
             child: _MoreGroup(
+              title: 'Play',
+              tiles: [
+                _MoreTile(
+                  icon: Icons.travel_explore_rounded,
+                  title: 'Explore',
+                  subtitle: 'Zones, live spawns and rare encounters',
+                  onTap: () => _push(context, const ExploreScreen()),
+                ),
+                _MoreTile(
+                  icon: Icons.storefront_rounded,
+                  title: 'Shop',
+                  subtitle: 'Balls, potions, berries and incense',
+                  onTap: () => _push(context, const ShopScreen()),
+                ),
+              ],
+            ),
+          ),
+          StaggeredEntrance(
+            index: 3,
+            child: _MoreGroup(
               title: 'Collection',
               tiles: [
                 _MoreTile(
                   icon: Icons.menu_book_rounded,
                   title: 'Pokédex',
-                  subtitle: '${state.caught} of 1,025 registered',
+                  subtitle: '${trainer.caughtCount} of 1,025 registered',
                   onTap: () => _push(context, const PokedexScreen()),
                 ),
                 _MoreTile(
                   icon: Icons.backpack_rounded,
                   title: 'Bag',
-                  subtitle: '$itemCount items across 6 categories',
+                  subtitle: '${trainer.itemCount} items across 6 categories',
                   onTap: () => _push(context, const BagScreen()),
                 ),
+              ],
+            ),
+          ),
+          StaggeredEntrance(
+            index: 4,
+            child: _MoreGroup(
+              title: 'Roadmap',
+              tiles: [
                 _MoreTile(
                   icon: Icons.handyman_rounded,
                   title: 'Crafting',
                   subtitle: 'Apricorns to balls, berries to potions',
-                  badge: 'M5',
+                  badge: 'Planned',
                   onTap: () => _soon(context, 'Crafting'),
                 ),
                 _MoreTile(
-                  icon: Icons.eco_rounded,
-                  title: 'Berry farm',
-                  subtitle: 'Grow berries in your hideout',
-                  badge: 'M5',
-                  onTap: () => _soon(context, 'Farming'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          StaggeredEntrance(
-            index: 3,
-            child: _MoreGroup(
-              title: 'Economy',
-              tiles: [
-                _MoreTile(
                   icon: Icons.storefront_rounded,
-                  title: 'Shop',
-                  subtitle: 'Spend ${state.coins} coins on supplies',
-                  onTap: () => _push(context, const ShopScreen()),
-                ),
-                _MoreTile(
-                  icon: Icons.sell_rounded,
-                  title: 'Market',
-                  subtitle: 'Buy, sell and auction Pokémon',
-                  badge: 'M4',
+                  title: 'Market & trades',
+                  subtitle: 'List, bid, wonder trade and GTS',
+                  badge: 'Planned',
                   onTap: () => _soon(context, 'The market'),
                 ),
-                _MoreTile(
-                  icon: Icons.swap_horiz_rounded,
-                  title: 'Wonder Trade',
-                  subtitle: 'One free random swap per hour',
-                  badge: 'M4',
-                  onTap: () => _soon(context, 'Wonder Trade'),
-                ),
-                _MoreTile(
-                  icon: Icons.confirmation_number_rounded,
-                  title: 'Season pass',
-                  subtitle: 'Free and premium tracks',
-                  badge: 'M5',
-                  onTap: () => _soon(context, 'The season pass'),
-                ),
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
           StaggeredEntrance(
-            index: 4,
-            child: _MoreGroup(
-              title: 'Account',
-              tiles: [
-                _MoreTile(
-                  icon: Icons.settings_rounded,
-                  title: 'Settings',
-                  subtitle: 'Theme, local save and about',
-                  onTap: () => _push(context, const SettingsScreen()),
-                ),
-                _MoreTile(
-                  icon: Icons.description_outlined,
-                  title: 'Licenses',
-                  subtitle: 'Open-source notices',
-                  onTap: () => showLicensePage(
-                    context: context,
-                    applicationName: 'Pokéventure',
-                    applicationVersion: '1.0.0 (dev)',
+            index: 5,
+            child: Card(
+              child: InkWell(
+                onTap: () async {
+                  ref.read(soundServiceProvider).tap();
+                  await Credits.openCreator();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          gradient: AppTheme.heroGradient(theme.brightness),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'IF',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Created by ItzFallenMe',
+                              style: theme.textTheme.titleSmall,
+                            ),
+                            Text(
+                              'github.com/ItzFallenMe',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.open_in_new_rounded,
+                        size: 18,
+                        color: scheme.primary,
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          StaggeredEntrance(
+            index: 6,
+            child: Text(
+              'Pokéventure 1.1.0 · fan project. Pokémon is a trademark of '
+              'Nintendo, Creators, Game Freak and The Pokémon Company.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.5,
+              ),
             ),
           ),
         ],
@@ -197,42 +284,28 @@ class _MoreGroup extends StatelessWidget {
   const _MoreGroup({required this.title, required this.tiles});
 
   final String title;
-  final List<Widget> tiles;
+  final List<_MoreTile> tiles;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-          child: Text(
-            title.toUpperCase(),
-            style: theme.textTheme.labelSmall?.copyWith(
-              letterSpacing: 1.2,
-              color: scheme.onSurfaceVariant,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SectionHeader(title: title),
+          Card(
+            child: Column(
+              children: [
+                for (var i = 0; i < tiles.length; i++) ...[
+                  tiles[i],
+                  if (i != tiles.length - 1) const Divider(height: 1),
+                ],
+              ],
             ),
           ),
-        ),
-        Card(
-          child: Column(
-            children: [
-              for (var i = 0; i < tiles.length; i++) ...[
-                tiles[i],
-                if (i != tiles.length - 1)
-                  Divider(
-                    height: 1,
-                    indent: 60,
-                    color: scheme.outlineVariant.withValues(alpha: 0.6),
-                  ),
-              ],
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -249,63 +322,31 @@ class _MoreTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final String? badge;
   final VoidCallback onTap;
+  final String? badge;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
+    final scheme = Theme.of(context).colorScheme;
     return ListTile(
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: 2,
-      ),
       leading: Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(AppRadius.xs),
+          color: scheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(11),
         ),
         child: Icon(icon, size: 19, color: scheme.primary),
       ),
       title: Text(
         title,
-        style: theme.textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.w700,
-        ),
+        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
       ),
-      subtitle: Text(
-        subtitle,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: scheme.onSurfaceVariant,
-        ),
-      ),
-      trailing: badge == null
-          ? Icon(
-              Icons.chevron_right_rounded,
-              color: scheme.onSurfaceVariant,
-            )
-          : Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                badge!,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: scheme.onSurfaceVariant,
-                ),
-              ),
-            ),
+      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+      trailing: badge != null
+          ? PillBadge(label: badge!, color: scheme.onSurfaceVariant)
+          : Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
     );
   }
 }

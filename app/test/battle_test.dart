@@ -8,12 +8,16 @@ import 'package:http/testing.dart';
 import 'package:pokeventure/app/pokeventure_app.dart';
 import 'package:pokeventure/data/battle_api.dart';
 import 'package:pokeventure/data/battle_log.dart';
+import 'package:pokeventure/data/dex_repository.dart';
+import 'package:pokeventure/data/local/key_value_store.dart';
 import 'package:pokeventure/data/models/battle.dart';
 import 'package:pokeventure/data/models/move_entry.dart';
 import 'package:pokeventure/data/models/pokemon_type.dart';
 import 'package:pokeventure/data/type_chart.dart';
 import 'package:pokeventure/features/battle/battle_arena_screen.dart';
 import 'package:pokeventure/ui/widgets/pokemon_sprite.dart';
+
+import 'helpers.dart';
 
 const _move = BattleMove(
   name: 'Earthquake',
@@ -79,6 +83,14 @@ final _snapshot = BattleSnapshot(
 );
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  late DexCatalog catalog;
+
+  setUpAll(() async {
+    catalog = await loadTestCatalog();
+  });
+
   setUp(() {
     SpriteConfig.enabled = false;
   });
@@ -282,18 +294,21 @@ void main() {
       );
     });
 
+    final store = startedStore(catalog);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           battleApiProvider.overrideWithValue(
             BattleApi(baseUrl: 'http://test.local', client: client),
           ),
+          storeProvider.overrideWithValue(store),
+          dexCatalogProvider.overrideWithValue(catalog),
         ],
         child: const PokeventureApp(),
       ),
     );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pump(const Duration(milliseconds: 1200));
 
     await tester.tap(find.text('Battle'));
     await tester.pump();

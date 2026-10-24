@@ -5,17 +5,19 @@
 > Status: **design approved; app and battle server built and shipping APKs via CI**.
 > Stack assumed: **Flutter** (client) + **Node.js/TypeScript** (game server), matching the repo's devcontainer.
 >
-> **Built so far:** Material 3 theme and tokens, home hub, catch minigame,
-> party of six with PC swap, 1,025-species Pokédex generated from `@pkmn/dex`,
-> bag, coin shop, settings, local persistence, PokeAPI sprites, and a Node/TS
-> server running **real Showdown battles vs an AI** through the vendored
-> `pokemon-showdown` submodule. Type-coloured battle moves with live type
-> effectiveness, Supabase-backed trainer cards, QR friend codes, friend
-> requests and **human-vs-human friend battles** with invite codes, 34 Flutter
-> tests, 6 server tests, release APK, GitHub Actions for the APK and the server,
-> and a Docker/Render path for free hosting.
-> Still missing: full accounts (social is anonymous), server-side collection
-> sync, ranked ladder, party-based formats, market, guilds and raids.
+> **Built so far:** starter onboarding, six generated exploration zones with
+> live spawns, a data-driven catch minigame (species catch rate, five balls,
+> berries, timing, flee, 1/2048 shiny), real IVs/natures/EVs/stats,
+> XP/level-up/move learning/evolution, party of six with PC storage, daily
+> quests, streaks, a 1,025-species Pokédex with flavour text and learnsets,
+> bag/shop with usable items, and a Node/TS server running **real Showdown
+> battles vs an AI** through the vendored `pokemon-showdown` submodule.
+> Type-coloured battle moves with live effectiveness, Supabase-backed trainer
+> cards, QR friend codes and **human-vs-human friend battles**. Motion system,
+> confetti/shiny/level-up celebrations, original music and SFX, Pokémon cries,
+> six accent palettes, avatars/titles, dynamic colour, and 55 Flutter tests.
+> Still missing: full accounts (saves are device-local), server-side collection
+> sync, campaign gyms, ranked ladder, market/trading, guilds and raids.
 
 ---
 

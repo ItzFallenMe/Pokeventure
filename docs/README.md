@@ -32,11 +32,13 @@ cd PokeNext
 cd server && npm start
 
 # terminal 2
-cd app && flutter run
+cd app
+cp .env.example .env       # set API_BASE_URL (and Supabase keys if wanted)
+flutter run --dart-define-from-file=.env
 ```
 
-Then open **Battle → Random battle**. Social needs Supabase; see
-[SUPABASE.md](SUPABASE.md).
+Then pick a starter and catch your first Pokémon in **Explore**. Social needs
+Supabase; see [SUPABASE.md](SUPABASE.md).
 
 ## What each guide covers
 
@@ -67,7 +69,9 @@ render.yaml              Render blueprint
 | Topic | File |
 |---|---|
 | App theme and tokens | `app/lib/ui/theme/`, `app/lib/ui/tokens/` |
-| Party/PC rules and persistence | `app/lib/state/party_provider.dart` |
+| Trainer, collection, quests and persistence | `app/lib/state/trainer_provider.dart` |
+| Stats, catch odds, wild spawns and quests | `app/lib/data/game/` |
+| Theme, motion and customisation tokens | `app/lib/ui/theme/`, `app/lib/ui/motion/`, `app/lib/ui/tokens/` |
 | Battle screens | `app/lib/features/battle/` |
 | Social screens and QR | `app/lib/features/social/` |
 | Supabase repository | `app/lib/data/social/` |

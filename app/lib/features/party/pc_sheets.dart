@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/pokemon.dart';
-import '../../state/party_provider.dart';
+import '../../state/trainer_provider.dart';
 import '../../ui/theme/app_theme.dart';
 import '../../ui/tokens/layout.dart';
 import '../../ui/widgets/pokemon_orb.dart';
@@ -34,7 +34,7 @@ class PcSwapSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final state = ref.watch(partyProvider);
+    final state = ref.watch(trainerProvider);
     final outgoing = state.party[partyIndex];
 
     return ConstrainedBox(
@@ -74,7 +74,7 @@ class PcSwapSheet extends ConsumerWidget {
                       final messenger = ScaffoldMessenger.of(context);
                       final navigator = Navigator.of(context);
                       ref
-                          .read(partyProvider.notifier)
+                          .read(trainerProvider.notifier)
                           .swapWithBox(partyIndex, candidate.id);
                       navigator.pop();
                       messenger.showSnackBar(
@@ -105,7 +105,7 @@ class PcBoxSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final state = ref.watch(partyProvider);
+    final state = ref.watch(trainerProvider);
 
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -124,10 +124,7 @@ class PcBoxSheet extends ConsumerWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    'PC Boxes',
-                    style: theme.textTheme.headlineSmall,
-                  ),
+                  child: Text('PC Boxes', style: theme.textTheme.headlineSmall),
                 ),
                 Text(
                   '${state.box.length} stored',
@@ -146,24 +143,51 @@ class PcBoxSheet extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             Flexible(
-              child: GridView.builder(
-                shrinkWrap: true,
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: AppSpacing.sm,
-                  crossAxisSpacing: AppSpacing.sm,
-                  childAspectRatio: 1.42,
-                ),
-                itemCount: state.box.length,
-                itemBuilder: (context, index) {
-                  final pokemon = state.box[index];
-                  return _BoxCard(
-                    pokemon: pokemon,
-                    onTap: () => _promptPartySlot(context, ref, pokemon),
-                  );
-                },
-              ),
+              child: state.box.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.xl,
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.inbox_rounded,
+                            size: 38,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            'The PC is empty',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          Text(
+                            'Caught Pokémon go here when the party is full.',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : GridView.builder(
+                      shrinkWrap: true,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: AppSpacing.sm,
+                            crossAxisSpacing: AppSpacing.sm,
+                            childAspectRatio: 1.42,
+                          ),
+                      itemCount: state.box.length,
+                      itemBuilder: (context, index) {
+                        final pokemon = state.box[index];
+                        return _BoxCard(
+                          pokemon: pokemon,
+                          onTap: () => _promptPartySlot(context, ref, pokemon),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -176,7 +200,7 @@ class PcBoxSheet extends ConsumerWidget {
     WidgetRef ref,
     Pokemon incoming,
   ) async {
-    final party = ref.read(partyProvider).party;
+    final party = ref.read(trainerProvider).party;
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
@@ -219,7 +243,7 @@ class PcBoxSheet extends ConsumerWidget {
     if (slot == null || !context.mounted) return;
 
     final outgoingName = party[slot].name;
-    ref.read(partyProvider.notifier).swapWithBox(slot, incoming.id);
+    ref.read(trainerProvider.notifier).swapWithBox(slot, incoming.id);
     navigator.pop();
     messenger.showSnackBar(
       SnackBar(

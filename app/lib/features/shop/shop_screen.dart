@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/item_catalog.dart';
-import '../../state/party_provider.dart';
+import '../../state/theme_provider.dart';
+import '../../state/trainer_provider.dart';
 import '../../ui/theme/app_theme.dart';
 import '../../ui/tokens/layout.dart';
 import '../../ui/widgets/common.dart';
@@ -14,7 +15,7 @@ class ShopScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final state = ref.watch(partyProvider);
+    final state = ref.watch(trainerProvider);
     final groups = <ItemCategory, List<ItemDef>>{};
     for (final item in itemCatalog.where((item) => item.purchasable)) {
       groups.putIfAbsent(item.category, () => []).add(item);
@@ -56,7 +57,8 @@ class ShopScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Demo shop — purchases spend local coins and save to this device.',
+            'Balls, medicine, berries and key items. Everything is bought with '
+            'coins earned in the world.',
             style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -69,8 +71,14 @@ class ShopScreen extends ConsumerWidget {
                 item: item,
                 affordable: state.coins >= item.price,
                 onBuy: () {
-                  final bought =
-                      ref.read(partyProvider.notifier).buyItem(item);
+                  final bought = ref
+                      .read(trainerProvider.notifier)
+                      .buyItem(item);
+                  if (bought) {
+                    ref.read(soundServiceProvider).purchase();
+                  } else {
+                    ref.read(soundServiceProvider).error();
+                  }
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
                     ..showSnackBar(
@@ -157,9 +165,7 @@ class _ShopRow extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
-                          color: affordable
-                              ? scheme.onSurface
-                              : scheme.error,
+                          color: affordable ? scheme.onSurface : scheme.error,
                         ),
                       ),
                     ],

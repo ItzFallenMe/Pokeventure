@@ -1,9 +1,11 @@
 # Pokéventure
 
 A mobile collection RPG inspired by Pokétwo, built around the **real Pokémon
-Showdown battle engine**. Catch Pokémon, build a party of six, complete the
-Pokédex, add friends with a QR code, and play a turn-by-turn battle against
-them on two phones.
+Showdown battle engine**. Pick a starter, explore six live zones, catch and
+train Pokémon from all 1,025 species, complete daily research, build a party of
+six, add friends with a QR code, and battle them on two phones.
+
+Created and maintained by **[ItzFallenMe](https://github.com/ItzFallenMe)**.
 
 [![APK](https://github.com/iwannabeyourshere/PokeNext/actions/workflows/apk.yml/badge.svg)](https://github.com/iwannabeyourshere/PokeNext/actions/workflows/apk.yml)
 [![Server](https://github.com/iwannabeyourshere/PokeNext/actions/workflows/server.yml/badge.svg)](https://github.com/iwannabeyourshere/PokeNext/actions/workflows/server.yml)
@@ -29,16 +31,19 @@ clean machine to an APK on your phone.
 
 | Area | What works |
 |---|---|
-| **Home** | Daily hub with a featured spawn, streak, currencies, quests and quick actions. |
-| **Catch** | Timing-ring minigame, ball choice, shiny reveal, haptics. A full party offers the PC instead of breaking the six limit. |
-| **Party** | Six slots, drag to reorder the lead, heal all, per-Pokémon details (stats, IVs, nature, ability, item, moves), PC storage and swapping. |
-| **Pokédex** | All 1,025 species generated from `@pkmn/dex`: search, 18 type filters, caught/missing filters, base stats and abilities. |
-| **Bag & shop** | Six item categories and coin purchases that update the bag. |
-| **Battle (AI)** | A real Showdown random battle against an AI. Type-coloured moves with live effectiveness, switches, forced replacements, HP, status, party dots and a readable log. |
-| **Social** | Anonymous sign-in, trainer card with a unique code, QR display and camera scanning, friend requests, accept/decline, remove, online/last-seen. |
-| **Friend battles** | Create an invite, share the code or QR, and play a human-vs-human battle. Both sides poll for the other player's move, so no websocket is needed. |
-| **Settings** | Light/dark/system theme, local save summary, reset, licences. |
-| **Offline** | Party, PC, coins, gems, bag and theme persist locally. Sprites fall back to type-coloured orbs. The Social tab explains setup instead of faking data. |
+| **Onboarding** | Name your trainer, pick Bulbasaur, Charmander or Squirtle, and get a real level-5 partner with IVs, nature, ability and level-up moves. |
+| **Explore** | Six generated zones (Verdant Route → Spirit Marsh) with type-themed pools, level bands, rarity tiers, a 90-second spawn timer and incense. |
+| **Catch** | Species catch rate, level and HP roll the odds; Poké/Great/Ultra/Net/Dusk Balls, Razz Berries, timing rings, flee chance, 1-in-2,048 shiny odds, throw and wobble animation, cries and haptics. |
+| **Training** | Real XP curve, level-ups, move learning, level evolutions, all 25 natures, IVs, EVs and level-scaled stats. |
+| **Party & PC** | Six slots, drag the lead, heal, swap with the PC, favourites, nicknames, release for coins, move between party and boxes. |
+| **Pokédex** | All 1,025 species with flavour text, genus, height/weight, catch rate, base stats, abilities, evolutions and learnsets. Search, type filters and caught/missing progress. |
+| **Bag & shop** | Balls, medicine, berries, TMs, key items and materials. Buy with coins and use potions/revives/candies on a chosen Pokémon. |
+| **Daily loop** | Three rotating daily quests, reward claiming, streaks, a daily gift and a date-stable featured Pokémon. |
+| **Battle (AI)** | A real Showdown random battle against an AI. Type-coloured moves with live effectiveness, switches, forced replacements, HP, status, party dots and a readable log; wins and losses pay coins/XP and advance quests. |
+| **Social** | Anonymous sign-in, trainer card with a unique code, QR display and scanning, friend requests and friend battles over invite codes. |
+| **Sound & motion** | Original looping theme, UI cues, Pokémon cries, confetti celebrations, level-up and shiny reveals, shimmer loading, press feedback — all skippable and reduced-motion aware. |
+| **Customisation** | Six accent palettes, eight avatars, six trainer titles, Material You dynamic colour, light/dark/system, animation, sound, music and haptics toggles. |
+| **Offline** | Party, PC, coins, bag, dex, quests, settings and trainer persist on-device. Sprites fall back to type-coloured orbs when offline; social explains its setup instead of faking data. |
 
 Battles run on the actual `smogon/pokemon-showdown` simulator, vendored as a git
 submodule and used unmodified. The server only exposes what each player is
@@ -113,12 +118,19 @@ curl http://localhost:8787/health
 ```
 
 The app uses `http://10.0.2.2:8787` on the Android emulator (host loopback) and
-`http://127.0.0.1:8787` elsewhere. On a physical phone, point it at your
-computer's LAN address:
+`http://127.0.0.1:8787` elsewhere. To set the API URL, Supabase keys or both,
+copy the env template once and run with it:
 
 ```bash
 cd app
-flutter run --dart-define=API_BASE_URL=http://192.168.1.50:8787
+cp .env.example .env      # edit API_BASE_URL / SUPABASE_* inside
+flutter run --dart-define-from-file=.env
+```
+
+`.env` is git-ignored. The same file works for release builds:
+
+```bash
+flutter build apk --release --dart-define-from-file=.env
 ```
 
 > The phone and computer must be on the same network, and port 8787 must not be
@@ -264,11 +276,15 @@ without HTTPS works; use HTTPS in production.
 
 ## Configuration
 
+Copy `app/.env.example` to `app/.env` and pass it with
+`--dart-define-from-file=.env`. Plain `--dart-define=KEY=value` still works and
+wins when both are present.
+
 | Build define | Default | Purpose |
 |---|---|---|
 | `API_BASE_URL` | `10.0.2.2:8787` on Android, `127.0.0.1:8787` elsewhere | Game server |
 | `SUPABASE_URL` | empty | Enables Social |
-| `SUPABASE_ANON_KEY` | empty | Enables Social |
+| `SUPABASE_ANON_KEY` | empty | Enables Social (the anon key is public by design; never use a service-role key in the app) |
 
 | Server env | Default | Purpose |
 |---|---|---|
@@ -277,12 +293,13 @@ without HTTPS works; use HTTPS in production.
 ## Tests
 
 ```bash
-cd app && flutter analyze && flutter test        # 34 widget/unit tests
+cd app && flutter analyze && flutter test        # 55 widget/unit tests
 cd server && npm run typecheck && npm test       # 6 tests, real engine
 ```
 
-App tests cover the party-of-six invariant, PC swaps, reorder, heal, catch and
-shop flows, persistence, dex loading, tab navigation at a 390×844 phone
+App tests cover the starter flow, real catch odds, XP and evolution, stat and
+nature math, daily quests, party/PC limits, shop and bag use, persistence, the
+generated 1,025-species dataset and its zones, dex loading, every tab at a phone
 viewport, type effectiveness, move data, QR payloads, social flows and friend
 battle polling. Server tests play real AI and friend battles to a winner,
 including forced switches and Revival Blessing.
@@ -367,11 +384,17 @@ More detail: [docs/SETUP.md](docs/SETUP.md#troubleshooting).
 
 ## What is not built yet
 
-- Full accounts (email/OAuth), server-side collection sync, ranked ladders,
-  party-based formats, trading/market, guilds and raids.
-- Sprites are fetched at runtime; there is no offline sprite pack.
+The core loop is complete: onboarding, explore, catch, train, party/PC, dex,
+bag, shop, quests, settings, sound and local saves. The rest of the design still
+needs server work:
+
+- Full accounts (email/OAuth) and server-side collection sync — progress is
+  device-local today.
+- Campaign gyms and Elite Four, ranked ladder, tournaments and replays.
+- Trading, market, GTS and Wonder Trade (server-escrow required).
+- Guilds, raids, breeding, contests and seasonal live-ops.
+- Sprites and cries are fetched at runtime; there is no bundled offline pack.
 - Battles and friend invites reset when the server restarts.
-- No offline sprite pack, ranked ladder, trading or guild features yet.
 - Release APKs are debug-signed; add a keystore before distributing widely.
 
 ## Contributing
@@ -418,8 +441,14 @@ Pokémon and Pokémon character names are trademarks of Nintendo, Creators, Game
 Freak and The Pokémon Company. This is a non-commercial fan project, not
 affiliated with or endorsed by them.
 
+- Creator and maintainer: **[ItzFallenMe](https://github.com/ItzFallenMe)**.
 - Species, move and sprite data: [PokeAPI](https://pokeapi.co/) and
   [`@pkmn/dex`](https://github.com/pkmn/ps).
+- Flavour text, genera, catch rates and community data:
+  [ItzFallenMe/pokemon-data.json](https://github.com/ItzFallenMe/pokemon-data.json).
 - Battle simulation: [smogon/pokemon-showdown](https://github.com/smogon/pokemon-showdown)
-  (MIT), vendored as a submodule and used unmodified.
+  (MIT), vendored as a submodule and used unmodified. Cries come from its audio
+  pack.
 - Social database and auth: [Supabase](https://supabase.com).
+- Display font: [Outfit](https://github.com/Outfitio/Outfit-Fonts) (SIL OFL).
+- Music and sound effects: original assets generated for this project.

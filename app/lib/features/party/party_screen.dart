@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../state/party_provider.dart';
+import '../../state/theme_provider.dart';
+import '../../state/trainer_provider.dart';
 import '../../ui/tokens/layout.dart';
 import '../../ui/widgets/common.dart';
 import '../../ui/widgets/pokemon_row.dart';
@@ -15,7 +16,7 @@ class PartyScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final state = ref.watch(partyProvider);
+    final state = ref.watch(trainerProvider);
 
     return SafeArea(
       bottom: false,
@@ -29,7 +30,8 @@ class PartyScreen extends ConsumerWidget {
         buildDefaultDragHandles: false,
         itemCount: state.party.length,
         onReorderItem: (oldIndex, newIndex) {
-          ref.read(partyProvider.notifier).reorder(oldIndex, newIndex);
+          ref.read(trainerProvider.notifier).reorder(oldIndex, newIndex);
+          ref.read(soundServiceProvider).tap();
         },
         header: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,12 +65,19 @@ class PartyScreen extends ConsumerWidget {
                     const SizedBox(height: 6),
                     TextButton.icon(
                       onPressed: () {
-                        ref.read(partyProvider.notifier).healAll();
+                        final healed = ref
+                            .read(trainerProvider.notifier)
+                            .healParty();
+                        ref.read(soundServiceProvider).tap();
                         ScaffoldMessenger.of(context)
                           ..hideCurrentSnackBar()
                           ..showSnackBar(
-                            const SnackBar(
-                              content: Text('Party restored to full health.'),
+                            SnackBar(
+                              content: Text(
+                                healed
+                                    ? 'Party restored to full health.'
+                                    : 'Everyone is already at full health.',
+                              ),
                             ),
                           );
                       },

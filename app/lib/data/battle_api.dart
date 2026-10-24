@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import '../app/app_config.dart';
 import 'models/battle.dart';
 
 class BattleApiException implements Exception {
@@ -17,18 +17,10 @@ class BattleApiException implements Exception {
 
 class BattleApi {
   BattleApi({String? baseUrl, http.Client? client})
-      : baseUrl = baseUrl ?? defaultBaseUrl,
-        _client = client ?? http.Client();
+    : baseUrl = baseUrl ?? defaultBaseUrl,
+      _client = client ?? http.Client();
 
-  static String get defaultBaseUrl {
-    const override = String.fromEnvironment('API_BASE_URL');
-    if (override.isNotEmpty) return override;
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      // Android emulator reaches the host machine through 10.0.2.2.
-      return 'http://10.0.2.2:8787';
-    }
-    return 'http://127.0.0.1:8787';
-  }
+  static String get defaultBaseUrl => AppConfig.apiBaseUrl;
 
   final String baseUrl;
   final http.Client _client;
@@ -41,10 +33,9 @@ class BattleApi {
   }
 
   Future<BattleSnapshot> choose(String battleId, String choice) async {
-    final response = await _post(
-      '/api/battles/$battleId/choice',
-      {'choice': choice},
-    );
+    final response = await _post('/api/battles/$battleId/choice', {
+      'choice': choice,
+    });
     return BattleSnapshot.fromJson(response);
   }
 

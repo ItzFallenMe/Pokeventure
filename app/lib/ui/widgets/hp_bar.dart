@@ -25,8 +25,8 @@ class HpBar extends StatelessWidget {
     final color = clamped > 0.5
         ? _healthy
         : clamped > 0.2
-            ? _warning
-            : _critical;
+        ? _warning
+        : _critical;
 
     return SizedBox(
       height: height,
@@ -66,10 +66,7 @@ class HpBar extends StatelessWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(999),
                           gradient: LinearGradient(
-                            colors: [
-                              color.withValues(alpha: 0.75),
-                              color,
-                            ],
+                            colors: [color.withValues(alpha: 0.75), color],
                           ),
                         ),
                       );

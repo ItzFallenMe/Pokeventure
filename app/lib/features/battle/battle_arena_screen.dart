@@ -284,7 +284,7 @@ class _BattleArenaScreenState extends ConsumerState<BattleArenaScreen> {
               busy: _busy,
               onMove: (index) => _submit('move $index'),
               onSwitch: _openSwitch,
-              onDone: () => Navigator.of(context).pop(),
+              onDone: () => Navigator.of(context).pop(_snapshot.playerWon),
               playerWon: _snapshot.playerWon,
               theme: theme,
               moves: moves,

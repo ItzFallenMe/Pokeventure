@@ -1,82 +1,192 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pokeventure/app/pokeventure_app.dart';
+import 'package:pokeventure/data/dex_repository.dart';
+import 'package:pokeventure/data/local/key_value_store.dart';
 import 'package:pokeventure/ui/widgets/pokemon_sprite.dart';
 
+import 'helpers.dart';
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  late DexCatalog catalog;
+
+  setUpAll(() async {
+    catalog = await loadTestCatalog();
+  });
+
   setUp(() {
     SpriteConfig.enabled = false;
   });
 
-  // The home screen has looping glow animations by design, so these tests pump
-  // fixed durations instead of waiting for a settle.
-  Future<void> boot(WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: PokeventureApp()));
+  testWidgets('onboarding picks a real starter and enters the hub', (
+    tester,
+  ) async {
+    await bootApp(tester, catalog, MemoryStore({...testSettings}));
+
+    expect(find.textContaining('Your first partner'), findsOneWidget);
+    expect(find.text('Start with Bulbasaur'), findsOneWidget);
+    expect(find.text('Charmander'), findsOneWidget);
+    expect(find.text('Squirtle'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'Misty');
+    final startButton = find.widgetWithText(
+      FilledButton,
+      'Start with Bulbasaur',
+    );
+    await tester.ensureVisible(startButton);
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(startButton);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 900));
-  }
+    await tester.pump(const Duration(milliseconds: 1200));
 
-  testWidgets('shows the home hub with the featured spawn', (tester) async {
-    await boot(tester);
+    expect(find.text('Misty'), findsOneWidget);
+    expect(find.text('DAILY POKÉMON'), findsOneWidget);
 
-    expect(find.text('Trainer'), findsOneWidget);
-    expect(find.text('Eevee'), findsOneWidget);
-    expect(find.text('Catch'), findsOneWidget);
-    expect(find.text('Home'), findsOneWidget);
-    expect(find.text('Party'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Your party'),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Your party'), findsOneWidget);
+    expect(find.text('1 / 6'), findsOneWidget);
   });
 
-  testWidgets('party tab lists six members and the PC', (tester) async {
-    await boot(tester);
+  testWidgets('home exposes the daily spawn and the catch sheet', (
+    tester,
+  ) async {
+    await bootApp(tester, catalog, startedStore(catalog));
 
-    await tester.tap(find.text('Party'));
+    expect(find.text('DAILY POKÉMON'), findsOneWidget);
+
+    await tester.tap(find.text('Catch now'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('Your party'), findsOneWidget);
-    expect(find.text('6 / 6'), findsOneWidget);
-    expect(find.text('Bulbasaur'), findsOneWidget);
-    expect(find.textContaining('Battles use this party'), findsOneWidget);
-  });
+    expect(find.text('WILD ENCOUNTER'), findsOneWidget);
+    expect(find.text('Catch chance'), findsOneWidget);
+    expect(find.text('Throw · tap the ring'), findsOneWidget);
 
-  testWidgets('catch sheet opens from the featured spawn', (tester) async {
-    await boot(tester);
-
-    await tester.tap(find.text('Catch'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
-
-    expect(find.text('Eevee appeared!'), findsOneWidget);
-    expect(find.text('Throw'), findsOneWidget);
-
-    // The ring animation loops, so close the sheet and let it tear down.
     await tester.tap(find.byTooltip('Close'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
   });
 
-  testWidgets('swapping from the PC keeps six and sends one out', (
+  testWidgets('explore spawns a wild Pokémon from the real zone table', (
     tester,
   ) async {
-    await boot(tester);
+    await bootApp(tester, catalog, startedStore(catalog));
+
+    await tester.tap(find.text('Explore the zones'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 900));
+
+    expect(find.text('Explore'), findsOneWidget);
+    expect(find.text('Where to next?'), findsOneWidget);
+    expect(find.text('Verdant Route'), findsWidgets);
+    expect(find.text('Catch'), findsOneWidget);
+    expect(find.textContaining('Lv.'), findsWidgets);
+  });
+
+  testWidgets('party tab starts with the starter and an empty PC', (
+    tester,
+  ) async {
+    await bootApp(tester, catalog, startedStore(catalog));
 
     await tester.tap(find.text('Party'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
-    await tester.tap(find.byTooltip('Swap with PC').first);
+    expect(find.text('Your party'), findsOneWidget);
+    expect(find.text('1 / 6'), findsOneWidget);
+    expect(find.text('Bulbasaur'), findsOneWidget);
+    expect(find.text('PC Boxes'), findsOneWidget);
+
+    await tester.tap(find.text('PC Boxes'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('Swap with the PC'), findsOneWidget);
+    expect(find.text('The PC is empty'), findsOneWidget);
 
-    await tester.tap(find.text('Ralts'));
+    await tester.tapAt(const Offset(8, 8));
+    await tester.pump(const Duration(milliseconds: 400));
+  });
+
+  testWidgets('shop buys with real coins', (tester) async {
+    await bootApp(tester, catalog, startedStore(catalog, extraCoins: 1000));
+
+    await tester.tap(find.text('More'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
 
-    expect(find.textContaining('Ralts joined the party'), findsOneWidget);
-    expect(find.text('6 / 6'), findsOneWidget);
+    await tester.tap(find.widgetWithText(ListTile, 'Shop'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(find.text('Poké Ball'), findsOneWidget);
+    await tester.tap(find.text('Buy').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.textContaining('added to your bag'), findsOneWidget);
+  });
+
+  testWidgets('dex loads the real dataset and filters by name', (tester) async {
+    await bootApp(tester, catalog, startedStore(catalog));
+
+    await tester.tap(find.text('More'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    await tester.tap(find.widgetWithText(ListTile, 'Pokédex'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(find.text('Pokédex'), findsOneWidget);
+    expect(find.text('Bulbasaur'), findsOneWidget);
+    expect(find.textContaining('complete'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'charizard');
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Charizard'), findsOneWidget);
+    expect(find.text('Bulbasaur'), findsNothing);
+  });
+
+  testWidgets('customisation changes accent, avatar and title', (tester) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await bootApp(tester, catalog, startedStore(catalog));
+
+    await tester.tap(find.text('More'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    await tester.tap(find.byTooltip('Settings'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(find.text('Customisation'), findsOneWidget);
+    expect(find.text('Accent colour'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Teal'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byTooltip('Blaze'));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.ensureVisible(find.text('Champion'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Champion'));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final chip = tester.widget<ChoiceChip>(
+      find.widgetWithText(ChoiceChip, 'Champion'),
+    );
+    expect(chip.selected, isTrue);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('every tab fits a phone viewport and scrolls cleanly', (
@@ -87,7 +197,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await boot(tester);
+    await bootApp(tester, catalog, startedStore(catalog));
 
     for (final tab in ['Party', 'Battle', 'Social', 'More', 'Home']) {
       await tester.tap(
@@ -104,61 +214,5 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       expect(tester.takeException(), isNull, reason: '$tab scroll overflowed');
     }
-  });
-
-  testWidgets('dex loads and filters by name', (tester) async {
-    await boot(tester);
-
-    await tester.ensureVisible(find.text('Dex'));
-    await tester.tap(find.text('Dex'));
-    await tester.pump();
-    // Asset loading is real async I/O, so give the event loop a turn.
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 400)),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 600));
-
-    expect(find.text('Pokédex'), findsOneWidget);
-    expect(find.text('Bulbasaur'), findsOneWidget);
-
-    await tester.enterText(find.byType(TextField), 'charizard');
-    await tester.pump(const Duration(milliseconds: 300));
-
-    expect(find.text('Charizard'), findsOneWidget);
-    expect(find.text('Bulbasaur'), findsNothing);
-  });
-
-  testWidgets('shop purchase updates the bag', (tester) async {
-    await boot(tester);
-
-    await tester.tap(find.text('More'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 600));
-
-    await tester.drag(find.byType(Scrollable).first, const Offset(0, -420));
-    await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(find.widgetWithText(ListTile, 'Shop'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 600));
-
-    expect(find.text('Poké Ball'), findsOneWidget);
-
-    await tester.tap(find.text('Buy').first);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
-    expect(find.textContaining('added to your bag'), findsOneWidget);
-  });
-
-  testWidgets('more tab renders the milestone tiles', (tester) async {
-    await boot(tester);
-
-    await tester.tap(find.text('More'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 600));
-
-    expect(find.text('Pokédex'), findsOneWidget);
-    expect(find.text('Market'), findsOneWidget);
   });
 }
