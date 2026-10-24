@@ -111,15 +111,26 @@ if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi
 The repository root now contains `index.js` for exactly this case. It:
 
 1. checks for Node 22.18+;
-2. clones Showdown if the upload skipped the submodule;
-3. installs Showdown and the server without npm lifecycle scripts, then fetches
+2. clones this repository into `PokeNext/` when only `index.js` was uploaded;
+3. clones Showdown if the upload skipped the submodule;
+4. installs Showdown and the server without npm lifecycle scripts, then fetches
    esbuild's platform binary explicitly (npm 12 blocks that postinstall);
-4. builds Showdown once;
-5. starts the TypeScript server in the foreground.
+5. builds Showdown once;
+6. starts the TypeScript server in the foreground.
 
 Set the panel's **`MAIN_FILE` startup variable to `index.js`** and choose a
 **Node 22.18+** image. Then start the server. The first boot spends a few
-minutes building Showdown; later boots detect the build and start immediately.
+minutes cloning and building; later boots detect the checkout and start
+immediately.
+
+If you are deploying before the latest work is on `main`, set
+`POKEVENTURE_REPO_BRANCH` to that branch. The clone can be customised with:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `POKEVENTURE_REPO_URL` | `https://github.com/iwannabeyourshere/PokeNext.git` | Repository to clone |
+| `POKEVENTURE_REPO_BRANCH` | `main` | Branch to clone |
+| `POKEVENTURE_REPO_DIR` | `PokeNext` next to `index.js` | Clone destination |
 
 If `MAIN_FILE` cannot be changed at all, ask the host to set it to `index.js`.
 A plain `npm start` in the repository root also works for hosts that allow a
