@@ -22,11 +22,25 @@ fi
 
 if [ ! -f vendor/pokemon-showdown/dist/sim/index.js ]; then
   echo "==> Building Showdown"
-  (cd vendor/pokemon-showdown && npm install --no-audit --no-fund && node build)
+  (
+    cd vendor/pokemon-showdown
+    # npm 12 blocks dependency install scripts by default. That skips
+    # esbuild's postinstall, which downloads the platform binary used by
+    # Showdown's build. Install without scripts, then fetch it explicitly.
+    npm install --ignore-scripts --no-audit --no-fund
+    node node_modules/esbuild/install.js
+    node build
+  )
 fi
 
 echo "==> Installing the game server"
-(cd server && npm install --no-audit --no-fund)
+(
+  cd server
+  # Panels sometimes set NODE_ENV=production; tsx is needed at runtime.
+  npm install --include=dev --ignore-scripts --no-audit --no-fund
+  # tsx also bundles esbuild; keep it usable on npm 12.
+  node node_modules/esbuild/install.js
+)
 
 echo
 echo "Ready. Set the startup command to:"

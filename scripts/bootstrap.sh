@@ -14,12 +14,20 @@ echo "==> Showdown engine"
 git submodule update --init --recursive
 (
   cd vendor/pokemon-showdown
-  npm install --no-audit --no-fund
+  # npm 12 blocks dependency install scripts by default; esbuild's platform
+  # binary has to be fetched before Showdown's build can run.
+  npm install --ignore-scripts --no-audit --no-fund
+  node node_modules/esbuild/install.js
   node build
 )
 
 echo "==> Game server"
-(cd server && npm install --no-audit --no-fund)
+(
+  cd server
+  # Panels sometimes set NODE_ENV=production; tsx is needed at runtime.
+  npm install --include=dev --ignore-scripts --no-audit --no-fund
+  node node_modules/esbuild/install.js
+)
 
 echo "==> Flutter app"
 (cd app && flutter pub get)
