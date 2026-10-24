@@ -644,6 +644,16 @@ class TrainerNotifier extends Notifier<TrainerState> {
     return true;
   }
 
+  /// Stores the HP a Pokémon has left after a battle turn, so damage and
+  /// fainting carry over into the party screen.
+  void setCurrentHp(String pokemonId, int hp) {
+    final target = state.pokemonById(pokemonId);
+    if (target == null) return;
+    final next = max(0, min(target.maxHp, hp));
+    if (next == target.currentHp) return;
+    _commit(_replacePokemon(state, target.copyWith(currentHp: next)));
+  }
+
   /// Uses a consumable on a specific Pokémon. Returns a short status message,
   /// or null when the item cannot be used.
   String? useItem(String slug, String pokemonId) {
