@@ -1,0 +1,59 @@
+name: Bug report
+description: Something in the app, server or setup does not work
+labels: ['bug', 'needs triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please do not paste secrets, API keys, private
+        server addresses or personal data. Security issues belong in the
+        private process described in SECURITY.md, not here.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Battle → Random battle
+        2. Tap a move
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - App – catching, party, PC, bag, shop
+        - App – Pokédex
+        - App – battle arena
+        - App – social, friends, QR
+        - Server – battles or friend lobbies
+        - Setup, build or APK workflow
+        - Documentation
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: APK build, release tag, or the output of `git rev-parse --short HEAD`.
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Phone model and Android version, or emulator image.
+      placeholder: Pixel 7, Android 15
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Paste relevant output from `flutter run`, the server console or `flutter analyze`.
+      render: shell

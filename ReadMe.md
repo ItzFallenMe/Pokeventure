@@ -7,6 +7,8 @@ them on two phones.
 
 [![APK](https://github.com/iwannabeyourshere/PokeNext/actions/workflows/apk.yml/badge.svg)](https://github.com/iwannabeyourshere/PokeNext/actions/workflows/apk.yml)
 [![Server](https://github.com/iwannabeyourshere/PokeNext/actions/workflows/server.yml/badge.svg)](https://github.com/iwannabeyourshere/PokeNext/actions/workflows/server.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 Flutter app · Node.js + TypeScript server · Supabase social database · PokeAPI
 sprites · Pokémon Showdown simulator.
@@ -20,7 +22,8 @@ clean machine to an APK on your phone.
 [Hosting](#host-the-server-free) · [APK from GitHub](#build-the-apk-with-github-actions) ·
 [Configuration](#configuration) · [Tests](#tests) · [Structure](#project-structure) ·
 [API](#api) · [Troubleshooting](#troubleshooting) ·
-[Limits](#what-is-not-built-yet) · [Docs](#documentation)
+[Limits](#what-is-not-built-yet) · [Contributing](#contributing) ·
+[Docs](#documentation) · [License](#license)
 
 ## What the app does
 
@@ -368,8 +371,35 @@ More detail: [docs/SETUP.md](docs/SETUP.md#troubleshooting).
   party-based formats, trading/market, guilds and raids.
 - Sprites are fetched at runtime; there is no offline sprite pack.
 - Battles and friend invites reset when the server restarts.
-- No license file is included yet; treat the code as all rights reserved until
-  one is added.
+- No offline sprite pack, ranked ladder, trading or guild features yet.
+- Release APKs are debug-signed; add a keystore before distributing widely.
+
+## Contributing
+
+Issues and pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md)
+for the development loop, the checks both CI workflows run, and the areas where
+help is most useful. Small, tested, focused changes are the easiest to review.
+
+- **[Bug report](.github/ISSUE_TEMPLATE/bug_report.yml)** — include the app
+  version, Android version and steps.
+- **[Feature request](.github/ISSUE_TEMPLATE/feature_request.yml)** — check
+  [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md) first.
+- **[Code of Conduct](CODE_OF_CONDUCT.md)** — applies to every project space.
+
+## Reporting a vulnerability
+
+Please report security problems privately through [SECURITY.md](SECURITY.md),
+not in a public issue. Only the Supabase **anon** key is ever shipped; the
+`service_role` key, database passwords and personal access tokens never belong
+in this repository. Build-time values live in GitHub Actions variables.
+
+## License
+
+[MIT](LICENSE) for the source code. Pokémon and Pokémon character names are
+trademarks of Nintendo, Creators, Game Freak and The Pokémon Company; this is a
+non-commercial fan project, not affiliated with or endorsed by them. The
+vendored Pokémon Showdown submodule keeps its own MIT license, and species,
+move and sprite data belongs to PokeAPI and `@pkmn/dex`.
 
 ## Documentation
 

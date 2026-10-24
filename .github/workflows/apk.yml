@@ -22,7 +22,7 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: apk-${{ github.ref }}
@@ -65,6 +65,9 @@ jobs:
     name: Build release APK
     needs: test
     runs-on: ubuntu-latest
+    # Only this job needs write access, and only to attach a tagged release.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 

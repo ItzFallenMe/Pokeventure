@@ -1,5 +1,31 @@
+# Dependencies and build output
 tools/node_modules/
 server/node_modules/
 server/dist/
+app/build/
+app/.dart_tool/
+app/.flutter-plugins-dependencies
+vendor/pokemon-showdown/node_modules/
+vendor/pokemon-showdown/dist/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+key.properties
+local.properties
+app/android/local.properties
+app/ios/Flutter/Generated.xcconfig
+app/ios/Flutter/flutter_export_environment.sh
+
+# Logs and OS cruft
 *.log
 .DS_Store
+Thumbs.db
+
+# Editors and local agent state
+.idea/
+.vscode/
+.freebuff/
