@@ -309,6 +309,7 @@ including forced switches and Revival Blessing.
 ## Project structure
 
 ```
+index.js                  panel entrypoint for fixed-startup Node hosts
 docs/                     guides and design
   SETUP.md                start here: clean machine → APK
   HOSTING.md              free server hosting, including Wispbyte

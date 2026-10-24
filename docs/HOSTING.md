@@ -9,6 +9,7 @@ so serverless platforms (Vercel, Netlify, Lambda, Cloudflare Workers) are the
 wrong fit. You need a container or VM that stays alive.
 
 **Jump to:** [Wispbyte](#wispbyte-no-sleep-panel-console) ·
+[Fixed-startup panel](#node-panel-with-a-fixed-startup-command) ·
 [Render](#render-easiest) · [Koyeb](#koyeb) ·
 [Northflank](#northflank-sandbox) ·
 [Oracle](#oracle-cloud-always-free-always-on) ·
@@ -23,6 +24,7 @@ the provider's pricing page before relying on one.
 | Option | Card needed | Always awake | Effort | Good for |
 |---|---|---|---|---|
 | **Wispbyte** | No | **Yes** — free 24/7 | Medium | A panel-based Node host that never sleeps; scripts included |
+| **Any Node panel** | No | Depends on the plan | Low | Hosts with a fixed `MAIN_FILE` startup; root `index.js` bootstraps everything |
 | **Render free** | No | No — sleeps after 15 min idle | Low | Trying the app with friends; blueprint included |
 | **Koyeb free** | No | No — scales to zero | Low | One small web service in the EU/US |
 | **Northflank Sandbox** | No | No — sandbox service | Low | A second free container |
@@ -95,6 +97,36 @@ weeks to keep the server; that is enough to keep a hobby server alive.
 - **`Cannot find module .../pokemon-showdown/dist/...`** — Showdown was not
   built on the panel. Run `bash scripts/wispbyte-setup.sh` once from the
   console; it clones and builds the engine when the uploaded files lack it.
+
+## Node panel with a fixed startup command
+
+Many Pterodactyl-style Node eggs cannot change their startup command. They run
+something like:
+
+```bash
+if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi
+/usr/local/bin/node "/home/container/${MAIN_FILE}" ${NODE_ARGS}
+```
+
+The repository root now contains `index.js` for exactly this case. It:
+
+1. checks for Node 22.18+;
+2. clones Showdown if the upload skipped the submodule;
+3. installs Showdown and the server without npm lifecycle scripts, then fetches
+   esbuild's platform binary explicitly (npm 12 blocks that postinstall);
+4. builds Showdown once;
+5. starts the TypeScript server in the foreground.
+
+Set the panel's **`MAIN_FILE` startup variable to `index.js`** and choose a
+**Node 22.18+** image. Then start the server. The first boot spends a few
+minutes building Showdown; later boots detect the build and start immediately.
+
+If `MAIN_FILE` cannot be changed at all, ask the host to set it to `index.js`.
+A plain `npm start` in the repository root also works for hosts that allow a
+custom command.
+
+Check `https://HOST:PORT/health`; set that URL as `API_BASE_URL` and rebuild
+the APK.
 
 ## Render (easiest)
 
