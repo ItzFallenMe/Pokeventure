@@ -7,6 +7,19 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: 'Game server URL baked into the APK (e.g. http://203.0.113.10:25565)'
+        required: false
+        type: string
+      supabase_url:
+        description: 'Supabase project URL (optional)'
+        required: false
+        type: string
+      supabase_anon_key:
+        description: 'Supabase anon/publishable key (optional)'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -70,19 +83,21 @@ jobs:
         run: flutter pub get
         working-directory: app
 
-      # Optional repository variables (Settings → Secrets and variables →
-      # Actions → Variables):
-      #   API_BASE_URL        public game-server URL, e.g. https://…onrender.com
-      #   SUPABASE_URL        https://YOUR-PROJECT.supabase.co
-      #   SUPABASE_ANON_KEY   the public anon/publishable key
-      # Leave them unset to build with local defaults and Social disabled.
+      # Values come from the manual-run inputs when present, otherwise from
+      # repository variables (Settings → Secrets and variables → Actions →
+      # Variables): API_BASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY.
+      # Leave everything unset to build with local defaults and Social off.
       - name: Build APK
         working-directory: app
+        env:
+          API_BASE_URL: ${{ inputs.api_base_url || vars.API_BASE_URL }}
+          SUPABASE_URL: ${{ inputs.supabase_url || vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ inputs.supabase_anon_key || vars.SUPABASE_ANON_KEY }}
         run: |
           flutter build apk --release \
-            --dart-define=API_BASE_URL=${{ vars.API_BASE_URL }} \
-            --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL }} \
-            --dart-define=SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY }}
+            --dart-define=API_BASE_URL="$API_BASE_URL" \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
 
       - name: Name the artifact
         run: |

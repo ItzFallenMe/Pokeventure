@@ -231,12 +231,13 @@ fails, fix the firewall or network first.
 ### From GitHub Actions (recommended)
 
 1. Fork or push the repo to GitHub.
-2. (Optional) Set build-time values under
-   **Settings → Secrets and variables → Actions → Variables**:
-   - `API_BASE_URL` — your server, e.g. `http://203.0.113.10:25565`
-   - `SUPABASE_URL` — `https://YOUR-PROJECT.supabase.co`
-   - `SUPABASE_ANON_KEY` — the public anon key
-3. Open **Actions → APK → Run workflow**.
+2. You can set the build values once under
+   **Settings → Secrets and variables → Actions → Variables**
+   (`API_BASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`), **or** type them
+   directly into the manual run form. Use the Wispbyte address for
+   `API_BASE_URL`, e.g. `http://203.0.113.10:25565`.
+3. Open **Actions → APK → Run workflow** (fill the three optional fields if you
+   did not set variables).
 4. When it turns green, open the run and download **Artifacts →
    `pokeventure-apk`**.
 5. Install on the phone:

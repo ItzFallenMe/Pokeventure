@@ -214,8 +214,8 @@ The [APK workflow](.github/workflows/apk.yml) runs `flutter analyze`,
 pull requests, and on demand.
 
 1. Push to GitHub (or use a fork).
-2. Optionally add repository **variables** under
-   **Settings → Secrets and variables → Actions → Variables**:
+2. Either set repository **variables** once under
+   **Settings → Secrets and variables → Actions → Variables**…
 
    | Variable | Example |
    |---|---|
@@ -223,7 +223,11 @@ pull requests, and on demand.
    | `SUPABASE_URL` | `https://YOUR-PROJECT.supabase.co` |
    | `SUPABASE_ANON_KEY` | your public anon key |
 
-3. Open **Actions → APK → Run workflow** (or push).
+   …or type the same three values when starting a **manual run**. Manual
+   inputs win over repository variables for that run.
+
+3. Open **Actions → APK → Run workflow**, fill the values if you did not set
+   variables, and run it. Pushes to `main` build with the variables/defaults.
 4. Download **Artifacts → `pokeventure-apk`**.
 
 Tag a release to attach the APK automatically:
