@@ -11,7 +11,7 @@
 > server running **real Showdown battles vs an AI** through the vendored
 > `pokemon-showdown` submodule. Type-coloured battle moves with live type
 > effectiveness, Supabase-backed trainer cards, QR friend codes, friend
-> requests and **human-vs-human friend battles** with invite codes, 33 Flutter
+> requests and **human-vs-human friend battles** with invite codes, 34 Flutter
 > tests, 6 server tests, release APK, GitHub Actions for the APK and the server,
 > and a Docker/Render path for free hosting.
 > Still missing: full accounts (social is anonymous), server-side collection

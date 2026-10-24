@@ -90,7 +90,9 @@ void main() {
         'Garchomp used Earthquake!',
       );
       expect(
-        prettifyBattleLogLine('|switch|p2a: Corviknight|Corviknight, L80|90/180'),
+        prettifyBattleLogLine(
+          '|switch|p2a: Corviknight|Corviknight, L80|90/180',
+        ),
         'Foe sent out Corviknight.',
       );
       expect(
@@ -130,10 +132,7 @@ void main() {
     });
 
     test('immunities are zero', () {
-      expect(
-        typeEffectiveness(PokemonType.electric, [PokemonType.ground]),
-        0,
-      );
+      expect(typeEffectiveness(PokemonType.electric, [PokemonType.ground]), 0);
       expect(typeEffectiveness(PokemonType.normal, [PokemonType.ghost]), 0);
     });
 
@@ -200,7 +199,12 @@ void main() {
                 'active': true,
                 'fainted': false,
                 'moves': [
-                  {'name': 'Earthquake', 'pp': 10, 'maxPp': 10, 'disabled': false},
+                  {
+                    'name': 'Earthquake',
+                    'pp': 10,
+                    'maxPp': 10,
+                    'disabled': false,
+                  },
                 ],
               },
             ],
@@ -228,8 +232,9 @@ void main() {
     expect(snapshot.canAct, isTrue);
   });
 
-  testWidgets('battle tab queues a server battle and opens the arena',
-      (tester) async {
+  testWidgets('battle tab queues a server battle and opens the arena', (
+    tester,
+  ) async {
     final client = MockClient((request) async {
       return http.Response(
         jsonEncode({
@@ -301,6 +306,65 @@ void main() {
     expect(find.text('Corviknight'), findsOneWidget);
     expect(find.text('Earthquake'), findsOneWidget);
     expect(find.textContaining('Turn 1'), findsOneWidget);
+  });
+
+  testWidgets('revival blessing lists fainted allies to revive', (
+    tester,
+  ) async {
+    SpriteConfig.enabled = false;
+    const revivingActive = BattleMember(
+      slot: 1,
+      species: 'Rabsca',
+      level: 80,
+      condition: '200/200',
+      hp: 1,
+      status: null,
+      active: true,
+      fainted: false,
+      reviving: true,
+      moves: [],
+    );
+    const revivedBench = BattleMember(
+      slot: 2,
+      species: 'Toedscruel',
+      level: 79,
+      condition: '0 fnt',
+      hp: 0,
+      status: null,
+      active: false,
+      fainted: true,
+      moves: [],
+    );
+    final snapshot = BattleSnapshot(
+      id: 'battle-revive',
+      format: 'gen9randombattle',
+      turn: 12,
+      ended: false,
+      winner: null,
+      canAct: false,
+      waiting: false,
+      forceSwitch: true,
+      playerName: 'Trainer',
+      team: const [revivingActive, revivedBench],
+      active: revivingActive,
+      opponent: _snapshot.opponent,
+      log: const ['|turn|12'],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(home: BattleArenaScreen(initial: snapshot)),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.textContaining('Revival Blessing'), findsOneWidget);
+    await tester.tap(find.text('Choose who to revive'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Revive who?'), findsOneWidget);
+    expect(find.text('Toedscruel'), findsOneWidget);
+    expect(find.textContaining('ready to revive'), findsOneWidget);
   });
 
   testWidgets('arena renders both sides and the four moves', (tester) async {

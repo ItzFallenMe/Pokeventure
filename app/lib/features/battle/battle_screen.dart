@@ -9,7 +9,10 @@ import '../../ui/widgets/common.dart';
 import 'battle_arena_screen.dart';
 
 class BattleScreen extends ConsumerStatefulWidget {
-  const BattleScreen({super.key});
+  const BattleScreen({super.key, this.onOpenSocial});
+
+  /// Switches to the Social tab, where friend invites live.
+  final VoidCallback? onOpenSocial;
 
   @override
   ConsumerState<BattleScreen> createState() => _BattleScreenState();
@@ -141,9 +144,61 @@ class _BattleScreenState extends ConsumerState<BattleScreen> {
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.lg),
           StaggeredEntrance(
             index: 5,
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: scheme.secondaryContainer,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.groups_2_rounded,
+                        size: 20,
+                        color: scheme.onSecondaryContainer,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Battle a friend',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            'Share an invite code or QR; both phones play the '
+                            'same engine.',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    FilledButton.tonal(
+                      onPressed: widget.onOpenSocial,
+                      child: const Text('Open Social'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          StaggeredEntrance(
+            index: 6,
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
@@ -186,46 +241,34 @@ class _BattleScreenState extends ConsumerState<BattleScreen> {
           ),
           const SizedBox(height: AppSpacing.lg),
           StaggeredEntrance(
-            index: 6,
+            index: 7,
             child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: scheme.surfaceContainerHighest,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.movie_outlined,
-                        size: 20,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Replays',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          Text(
-                            'Your first battle replay will appear here.',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+              child: ListTile(
+                leading: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.movie_outlined,
+                    size: 20,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                title: const Text(
+                  'Replays · M4',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                ),
+                subtitle: const Text(
+                  'Recording and sharing arrive with battle history.',
+                  style: TextStyle(fontSize: 12),
+                ),
+                trailing: Icon(
+                  Icons.lock_outline_rounded,
+                  size: 18,
+                  color: scheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -273,73 +316,61 @@ class _SeasonCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const PillBadge(label: 'SEASON 1', color: Colors.white),
+              const PillBadge(label: 'PRACTICE', color: Colors.white),
               const Spacer(),
-              const PillBadge(label: '12 DAYS LEFT', color: Colors.white),
+              PillBadge(label: 'UNRANKED', color: white.withValues(alpha: 0.9)),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Great Ball tier',
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: white.withValues(alpha: 0.8),
-            ),
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '1,482',
-                style: theme.textTheme.displaySmall?.copyWith(
-                  color: white,
-                  fontSize: 42,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Icon(
-                  Icons.trending_up_rounded,
-                  size: 20,
-                  color: AppTheme.gold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: 0.58,
-              minHeight: 7,
-              backgroundColor: white.withValues(alpha: 0.18),
-              color: white,
-            ),
+            'Every match is a real battle',
+            style: theme.textTheme.titleLarge?.copyWith(color: white),
           ),
           const SizedBox(height: 6),
-          Row(
+          Text(
+            'Rating, seasons and the ranked ladder need accounts. Until then, '
+            'practice against the AI or challenge a friend by code.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: white.withValues(alpha: 0.85),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.lg,
+            runSpacing: 6,
             children: [
-              Text(
-                '1,320',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: white.withValues(alpha: 0.75),
-                ),
-              ),
-              const Spacer(),
-              Text(
-                'Ultra Ball at 1,600',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: white.withValues(alpha: 0.75),
-                ),
-              ),
+              _Feature(label: 'Real Showdown engine', color: white),
+              _Feature(label: 'No fake ratings', color: white),
             ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class _Feature extends StatelessWidget {
+  const _Feature({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.check_circle_rounded, size: 16, color: AppTheme.gold),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: color.withValues(alpha: 0.8),
+          ),
+        ),
+      ],
     );
   }
 }

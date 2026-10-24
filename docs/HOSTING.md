@@ -1,8 +1,19 @@
 # Hosting the game server
 
+> Part of the [documentation index](README.md). New to the project? Do the
+> [local setup](SETUP.md) first, then host the server and rebuild the APK with
+> your public `API_BASE_URL`.
+
 The server is a long-running Node process that keeps battle sessions in memory,
 so serverless platforms (Vercel, Netlify, Lambda, Cloudflare Workers) are the
 wrong fit. You need a container or VM that stays alive.
+
+**Jump to:** [Wispbyte](#wispbyte-no-sleep-panel-console) ·
+[Render](#render-easiest) · [Koyeb](#koyeb) ·
+[Northflank](#northflank-sandbox) ·
+[Oracle](#oracle-cloud-always-free-always-on) ·
+[Home + tunnel](#home-machine--cloudflare-tunnel) ·
+[Notes](#notes-for-any-host)
 
 Free tiers change often — the limits below were checked in October 2026. Re-read
 the provider's pricing page before relying on one.
@@ -11,7 +22,7 @@ the provider's pricing page before relying on one.
 
 | Option | Card needed | Always awake | Effort | Good for |
 |---|---|---|---|---|
-| **Wispbyte** | No | **Yes** — free 24/7 | Medium | A panel-based Node host that never sleeps |
+| **Wispbyte** | No | **Yes** — free 24/7 | Medium | A panel-based Node host that never sleeps; scripts included |
 | **Render free** | No | No — sleeps after 15 min idle | Low | Trying the app with friends; blueprint included |
 | **Koyeb free** | No | No — scales to zero | Low | One small web service in the EU/US |
 | **Northflank Sandbox** | No | No — sandbox service | Low | A second free container |
@@ -31,7 +42,9 @@ builder, the Showdown engine has to be built once from the console. Two scripts
 in this repo do that.
 
 1. **Create a server** at [wispbyte.com](https://wispbyte.com) and pick a
-   **Node.js** image (Node 22 or newer).
+   **Node.js** image (Node 22 or newer). Many panel eggs default to Node 18,
+   which the engine cannot run — change the image in **Startup → Docker image /
+   Node version** before doing anything else. `node -v` must print v22.18+.
 2. **Get the code in.** Use the panel's GitHub import if it is offered, or
    upload the repo over SFTP. The `vendor/pokemon-showdown` folder is a
    submodule; if your upload skips submodules, the setup script clones the
@@ -67,6 +80,21 @@ in this repo do that.
 512 MB is the tight part. The engine with a couple of battles fits, but avoid
 running other bots on the same server. Wispbyte asks for a login every two
 weeks to keep the server; that is enough to keep a hobby server alive.
+
+### Common Wispbyte errors
+
+- **`EADDRINUSE: address already in use 0.0.0.0:8787`** — two things are trying
+  to listen. Usually a manually started `npm start` is still running next to
+  the panel's startup command, or an older copy that did not read
+  `SERVER_PORT` is running. Press **Stop**, update the files (the current
+  server reads `PORT`, then `SERVER_PORT`, then 8787), and start once. Never
+  run `npm start` by hand while the startup command is active.
+- **`Node.js v18.19.1` in a crash trace** — the panel is on Node 18.
+  `pokemon-showdown` needs 22.18+. Switch the Node image and rerun
+  `bash scripts/wispbyte-setup.sh`; the script refuses to continue on Node 18.
+- **`Cannot find module .../pokemon-showdown/dist/...`** — Showdown was not
+  built on the panel. Run `bash scripts/wispbyte-setup.sh` once from the
+  console; it clones and builds the engine when the uploaded files lack it.
 
 ## Render (easiest)
 
@@ -203,7 +231,8 @@ stable address.
 
 ## Notes for any host
 
-- **Node 22.18+** is required by current `pokemon-showdown`.
+- **Node 22.18+** is required by current `pokemon-showdown`. Node 18/20 will
+  fail or crash; check the image/version in your host's panel.
 - The server reads `PORT` first, then `SERVER_PORT` (Pterodactyl-style panels),
   and falls back to `8787`.
 - The Docker image is built from the repo root so the submodule is inside the

@@ -38,8 +38,9 @@ test(
         const index = active.moves.findIndex(
           (move) => !move.disabled && move.pp > 0,
         );
-        assert.ok(index >= 0, 'active Pokémon should have a usable move');
-        choice = `move ${index + 1}`;
+        // With every move out of PP, Showdown turns the first slot into
+        // Struggle, so `move 1` is still a legal choice.
+        choice = `move ${index >= 0 ? index + 1 : 1}`;
       }
 
       snapshot = await session.choose(choice);

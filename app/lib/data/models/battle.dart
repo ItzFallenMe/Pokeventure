@@ -34,6 +34,7 @@ class BattleMember {
     required this.active,
     required this.fainted,
     required this.moves,
+    this.reviving = false,
   });
 
   factory BattleMember.fromJson(Map<String, dynamic> json) {
@@ -46,6 +47,7 @@ class BattleMember {
       status: json['status'] as String?,
       active: json['active'] as bool? ?? false,
       fainted: json['fainted'] as bool? ?? false,
+      reviving: json['reviving'] as bool? ?? false,
       moves: (json['moves'] as List<dynamic>? ?? [])
           .map((raw) => BattleMove.fromJson(raw as Map<String, dynamic>))
           .toList(growable: false),
@@ -60,6 +62,10 @@ class BattleMember {
   final String? status;
   final bool active;
   final bool fainted;
+
+  /// Set on the Pokémon that used Revival Blessing: the next switch must pick
+  /// a fainted ally instead of a healthy one.
+  final bool reviving;
   final List<BattleMove> moves;
 
   String get hpLabel => condition.split(' ').first;
@@ -135,8 +141,9 @@ class BattleSnapshot {
       active: activeJson == null
           ? _activeOf(team)
           : BattleMember.fromJson(activeJson),
-      opponent:
-          opponentJson == null ? null : BattleOpponent.fromJson(opponentJson),
+      opponent: opponentJson == null
+          ? null
+          : BattleOpponent.fromJson(opponentJson),
       log: (json['log'] as List<dynamic>? ?? []).cast<String>(),
     );
   }

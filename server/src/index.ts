@@ -316,10 +316,31 @@ cleanup.unref();
 
 // Pterodactyl-based hosts (Wispbyte, etc.) expose the allocated port as
 // SERVER_PORT; Render/Fly/others use PORT.
-const port = Number(process.env.PORT ?? process.env.SERVER_PORT ?? 8787);
-app.listen(port, '0.0.0.0', () => {
+function resolvePort(): number {
+  for (const value of [process.env.PORT, process.env.SERVER_PORT]) {
+    const parsed = Number(value);
+    if (Number.isInteger(parsed) && parsed > 0 && parsed < 65_536) {
+      return parsed;
+    }
+  }
+  return 8787;
+}
+
+const port = resolvePort();
+const server = app.listen(port, '0.0.0.0', () => {
   console.log(
     `Pokéventure server on http://0.0.0.0:${port} · ` +
       `formats: ${SUPPORTED_FORMATS.join(', ')}`,
   );
+});
+
+server.on('error', (error: NodeJS.ErrnoException) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(
+      `Port ${port} is already in use. Stop the other instance, or set ` +
+        `PORT/SERVER_PORT to the port the host allocated.`,
+    );
+    process.exit(1);
+  }
+  throw error;
 });

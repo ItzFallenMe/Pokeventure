@@ -31,6 +31,8 @@ export interface BattleMemberView {
   status: string | null;
   active: boolean;
   fainted: boolean;
+  /** True when this Pokémon must pick a fainted ally to revive. */
+  reviving: boolean;
   moves: BattleMoveView[];
 }
 
@@ -347,8 +349,14 @@ export class BattleSession {
 
   private chooseForBot(request: any) {
     if (request.forceSwitch?.some(Boolean)) {
-      const index = (request.side?.pokemon ?? []).findIndex(
-        (mon: any) => !mon.active && !String(mon.condition).includes('fnt'),
+      const team: any[] = request.side?.pokemon ?? [];
+      // Revival Blessing borrows the switch request but only fainted Pokémon
+      // are legal targets.
+      const reviving = team.some((mon) => mon.reviving);
+      const index = team.findIndex((mon) =>
+        reviving
+          ? mon.fainted || String(mon.condition).includes('fnt')
+          : !mon.active && !String(mon.condition).includes('fnt'),
       );
       this.streams.p2.write(index >= 0 ? `switch ${index + 1}` : 'pass');
       return;
@@ -388,6 +396,23 @@ export class BattleSession {
     }
     return new Promise<void>((resolve, reject) => {
       const timer = setTimeout(() => {
+        const debug = {
+          side,
+          turn: this.turn,
+          ended: this.ended,
+          p1: this.requests.p1 && {
+            wait: this.requests.p1.wait,
+            active: this.requests.p1.active?.[0]?.moves?.length,
+            forceSwitch: this.requests.p1.forceSwitch,
+          },
+          p2: this.requests.p2 && {
+            wait: this.requests.p2.wait,
+            active: this.requests.p2.active?.[0]?.moves?.length,
+            forceSwitch: this.requests.p2.forceSwitch,
+          },
+          log: this.log.slice(-6),
+        };
+        console.error('battle request timeout', JSON.stringify(debug));
         reject(new Error('timed out waiting for the next battle request'));
       }, 10_000);
       this.waiters[side].push(() => {
@@ -432,6 +457,7 @@ export class BattleSession {
         status: this.conditionToStatus(String(mon.condition ?? '')),
         active: Boolean(mon.active),
         fainted: String(mon.condition ?? '').includes('fnt'),
+        reviving: Boolean(mon.reviving),
         moves: mon.active
           ? (request?.active?.[0]?.moves ?? []).map((move: any) => ({
               name: move.move,

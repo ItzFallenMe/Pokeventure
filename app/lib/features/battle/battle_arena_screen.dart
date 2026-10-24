@@ -60,7 +60,8 @@ class _BattleArenaScreenState extends ConsumerState<BattleArenaScreen> {
     try {
       final next = await friend.refresh();
       if (!mounted) return;
-      final changed = next.turn != _snapshot.turn ||
+      final changed =
+          next.turn != _snapshot.turn ||
           next.canAct != _snapshot.canAct ||
           next.ended != _snapshot.ended ||
           next.waiting != _snapshot.waiting ||
@@ -106,8 +107,12 @@ class _BattleArenaScreenState extends ConsumerState<BattleArenaScreen> {
   }
 
   Future<void> _openSwitch() async {
+    final reviving = _snapshot.active?.reviving ?? false;
     final bench = _snapshot.team
-        .where((member) => !member.fainted && !member.active)
+        .where(
+          (member) =>
+              !member.active && (reviving ? member.fainted : !member.fainted),
+        )
         .toList(growable: false);
     if (bench.isEmpty || _busy) return;
 
@@ -128,7 +133,7 @@ class _BattleArenaScreenState extends ConsumerState<BattleArenaScreen> {
                   AppSpacing.sm,
                 ),
                 child: Text(
-                  'Send out who?',
+                  reviving ? 'Revive who?' : 'Send out who?',
                   style: theme.textTheme.titleLarge,
                 ),
               ),
@@ -140,7 +145,11 @@ class _BattleArenaScreenState extends ConsumerState<BattleArenaScreen> {
                     size: 40,
                   ),
                   title: Text(member.species),
-                  subtitle: Text('Lv. ${member.level} · ${member.hpLabel}'),
+                  subtitle: Text(
+                    reviving
+                        ? 'Lv. ${member.level} · fainted, ready to revive'
+                        : 'Lv. ${member.level} · ${member.hpLabel}',
+                  ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => Navigator.of(sheetContext).pop(member.slot),
                 ),
@@ -194,10 +203,10 @@ class _BattleArenaScreenState extends ConsumerState<BattleArenaScreen> {
     final theme = Theme.of(context);
     final active = _snapshot.active;
     final opponent = _snapshot.opponent;
-    final moves = ref.watch(moveLookupProvider).value ??
-        const <String, MoveEntry>{};
-    final defenderTypes = _dexEntry(opponent?.species ?? '')?.types ??
-        const <PokemonType>[];
+    final moves =
+        ref.watch(moveLookupProvider).value ?? const <String, MoveEntry>{};
+    final defenderTypes =
+        _dexEntry(opponent?.species ?? '')?.types ?? const <PokemonType>[];
 
     return Scaffold(
       appBar: AppBar(
@@ -220,7 +229,9 @@ class _BattleArenaScreenState extends ConsumerState<BattleArenaScreen> {
             ),
           IconButton(
             tooltip: 'Leave battle',
-            onPressed: _snapshot.ended ? () => Navigator.of(context).pop() : _confirmLeave,
+            onPressed: _snapshot.ended
+                ? () => Navigator.of(context).pop()
+                : _confirmLeave,
             icon: const Icon(Icons.close_rounded),
           ),
         ],
@@ -318,12 +329,14 @@ class _CombatantCard extends StatelessWidget {
         : TypePalette.of(dexEntry!.types.first);
 
     final info = Column(
-      crossAxisAlignment:
-          reverse ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+      crossAxisAlignment: reverse
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.end,
       children: [
         Row(
-          mainAxisAlignment:
-              reverse ? MainAxisAlignment.start : MainAxisAlignment.end,
+          mainAxisAlignment: reverse
+              ? MainAxisAlignment.start
+              : MainAxisAlignment.end,
           children: [
             Text(
               label.toUpperCase(),
@@ -348,8 +361,9 @@ class _CombatantCard extends StatelessWidget {
         HpBar(value: fainted ? 0 : hp, height: 8),
         const SizedBox(height: 4),
         Row(
-          mainAxisAlignment:
-              reverse ? MainAxisAlignment.start : MainAxisAlignment.end,
+          mainAxisAlignment: reverse
+              ? MainAxisAlignment.start
+              : MainAxisAlignment.end,
           children: [
             Text(
               fainted ? 'Fainted' : hpLabel,
@@ -360,8 +374,7 @@ class _CombatantCard extends StatelessWidget {
             if (status != null && status!.isNotEmpty) ...[
               const SizedBox(width: 6),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: scheme.errorContainer,
                   borderRadius: BorderRadius.circular(999),
@@ -387,10 +400,7 @@ class _CombatantCard extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
-          colors: [
-            tint.withValues(alpha: 0.22),
-            tint.withValues(alpha: 0.02),
-          ],
+          colors: [tint.withValues(alpha: 0.22), tint.withValues(alpha: 0.02)],
         ),
       ),
       alignment: Alignment.center,
@@ -407,8 +417,16 @@ class _CombatantCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: reverse
-              ? [sprite, const SizedBox(width: AppSpacing.md), Expanded(child: info)]
-              : [Expanded(child: info), const SizedBox(width: AppSpacing.md), sprite],
+              ? [
+                  sprite,
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: info),
+                ]
+              : [
+                  Expanded(child: info),
+                  const SizedBox(width: AppSpacing.md),
+                  sprite,
+                ],
         ),
       ),
     );
@@ -516,8 +534,8 @@ class _PartyDots extends StatelessWidget {
                   color: member.fainted
                       ? scheme.outlineVariant
                       : member.active
-                          ? scheme.primary
-                          : scheme.primary.withValues(alpha: 0.3),
+                      ? scheme.primary
+                      : scheme.primary.withValues(alpha: 0.3),
                 ),
               ),
             ),
@@ -553,8 +571,7 @@ class _ActionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = theme.colorScheme;
-    final battleMoves =
-        snapshot.active?.moves ?? const <BattleMove>[];
+    final battleMoves = snapshot.active?.moves ?? const <BattleMove>[];
 
     Widget content;
     if (snapshot.ended) {
@@ -589,7 +606,9 @@ class _ActionPanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Your Pokémon fainted. Choose a replacement.',
+            snapshot.active?.reviving ?? false
+                ? 'Revival Blessing: pick a fainted Pokémon to bring back.'
+                : 'Your Pokémon fainted. Choose a replacement.',
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -598,7 +617,11 @@ class _ActionPanel extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: busy ? null : onSwitch,
               icon: const Icon(Icons.swap_horiz_rounded),
-              label: const Text('Choose a Pokémon'),
+              label: Text(
+                (snapshot.active?.reviving ?? false)
+                    ? 'Choose who to revive'
+                    : 'Choose a Pokémon',
+              ),
             ),
           ),
         ],
@@ -623,13 +646,13 @@ class _ActionPanel extends StatelessWidget {
                               ? battleMoves[row * 2 + column]
                               : null,
                           entry: battleMoves.length > row * 2 + column
-                              ? moves[battleMoves[row * 2 + column]
-                                  .name
-                                  .toLowerCase()]
+                              ? moves[battleMoves[row * 2 + column].name
+                                    .toLowerCase()]
                               : null,
                           defenderTypes: defenderTypes,
                           index: row * 2 + column + 1,
-                          enabled: !busy &&
+                          enabled:
+                              !busy &&
                               snapshot.canAct &&
                               battleMoves.isNotEmpty,
                           onPressed: onMove,
@@ -672,9 +695,7 @@ class _ActionPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surfaceContainer,
         border: Border(
-          top: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.6),
-          ),
+          top: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
         ),
       ),
       child: content,
@@ -714,19 +735,19 @@ class _MoveButton extends StatelessWidget {
     final foreground = !usable
         ? scheme.onSurfaceVariant
         : type == null
-            ? scheme.onPrimaryContainer
-            : TypePalette.text(type, brightness);
+        ? scheme.onPrimaryContainer
+        : TypePalette.text(type, brightness);
     final background = !usable
         ? scheme.surfaceContainerHighest
         : type == null
-            ? scheme.primaryContainer.withValues(alpha: 0.75)
-            : TypePalette.of(type).withValues(alpha: 0.22);
+        ? scheme.primaryContainer.withValues(alpha: 0.75)
+        : TypePalette.of(type).withValues(alpha: 0.22);
 
     return Tooltip(
       message: entry == null
           ? (move?.name ?? '')
           : '${entry!.category} · ${entry!.isStatus ? 'no power' : '${entry!.power} power'}'
-              '${entry!.accuracy == null ? '' : ' · ${entry!.accuracy}% accuracy'}',
+                '${entry!.accuracy == null ? '' : ' · ${entry!.accuracy}% accuracy'}',
       waitDuration: const Duration(milliseconds: 600),
       child: FilledButton.tonal(
         onPressed: usable ? () => onPressed(index) : null,
@@ -742,9 +763,9 @@ class _MoveButton extends StatelessWidget {
           side: type == null
               ? null
               : BorderSide(
-                  color: TypePalette.of(type).withValues(
-                    alpha: usable ? 0.55 : 0.2,
-                  ),
+                  color: TypePalette.of(
+                    type,
+                  ).withValues(alpha: usable ? 0.55 : 0.2),
                 ),
         ),
         child: Column(
@@ -766,10 +787,7 @@ class _MoveButton extends StatelessWidget {
                   ),
                 ),
                 if (effectiveness != null)
-                  _EffectivenessTag(
-                    multiplier: effectiveness,
-                    theme: theme,
-                  ),
+                  _EffectivenessTag(multiplier: effectiveness, theme: theme),
               ],
             ),
             Text(
@@ -802,8 +820,8 @@ class _EffectivenessTag extends StatelessWidget {
     final color = multiplier > 1
         ? scheme.tertiary
         : multiplier < 1
-            ? scheme.error
-            : scheme.onSurfaceVariant;
+        ? scheme.error
+        : scheme.onSurfaceVariant;
 
     return Container(
       margin: const EdgeInsets.only(left: 6),

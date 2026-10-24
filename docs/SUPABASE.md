@@ -1,5 +1,9 @@
 # Supabase setup (social)
 
+> Part of the [documentation index](README.md). Setting up the app for the first
+time? Follow [SETUP.md](SETUP.md) and come back to this page when you reach the
+Social step.
+
 The Social tab keeps trainer cards and friendships in Supabase Postgres and
 talks to it directly from the app. Battles stay on the game server; Supabase is
 only identity + social data, so the free project tier is enough for a long time.
@@ -13,10 +17,11 @@ OAuth can be added later without losing the profile.
 
 1. [supabase.com](https://supabase.com) → **New project** (free plan).
 2. Note the **Project URL** and the **anon public** key from
-   *Project Settings → API*.
+   *Project Settings → API*. Newer dashboards call this key the **publishable
+   key**; it is the same value and the same env var here.
 
-The `anon` key is safe to ship in a mobile app; row-level security is what
-protects the data. Never put the `service_role` key in the app.
+The anon/publishable key is safe to ship in a mobile app; row-level security is
+what protects the data. Never put the `service_role` key in the app.
 
 ## 2. Enable anonymous sign-ins
 

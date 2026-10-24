@@ -56,8 +56,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   });
 
-  testWidgets('swapping from the PC keeps six and sends one out',
-      (tester) async {
+  testWidgets('swapping from the PC keeps six and sends one out', (
+    tester,
+  ) async {
     await boot(tester);
 
     await tester.tap(find.text('Party'));
@@ -78,8 +79,9 @@ void main() {
     expect(find.text('6 / 6'), findsOneWidget);
   });
 
-  testWidgets('every tab fits a phone viewport and scrolls cleanly',
-      (tester) async {
+  testWidgets('every tab fits a phone viewport and scrolls cleanly', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1170, 2532);
     tester.view.devicePixelRatio = 3.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -88,15 +90,17 @@ void main() {
     await boot(tester);
 
     for (final tab in ['Party', 'Battle', 'Social', 'More', 'Home']) {
-      await tester.tap(find.text(tab));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text(tab),
+        ),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
       expect(tester.takeException(), isNull, reason: '$tab layout overflowed');
 
-      await tester.drag(
-        find.byType(Scrollable).first,
-        const Offset(0, -260),
-      );
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, -260));
       await tester.pump(const Duration(milliseconds: 400));
       expect(tester.takeException(), isNull, reason: '$tab scroll overflowed');
     }
@@ -132,10 +136,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
 
-    await tester.drag(
-      find.byType(Scrollable).first,
-      const Offset(0, -420),
-    );
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -420));
     await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.widgetWithText(ListTile, 'Shop'));
     await tester.pump();

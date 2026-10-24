@@ -20,7 +20,7 @@ class _AppShellState extends State<AppShell> {
   late final List<Widget> _pages = [
     HomeScreen(onOpenParty: () => _select(1)),
     const PartyScreen(),
-    const BattleScreen(),
+    BattleScreen(onOpenSocial: () => _select(3)),
     const SocialScreen(),
     const MoreScreen(),
   ];
@@ -47,10 +47,7 @@ class _AppShellState extends State<AppShell> {
             child: SlideTransition(position: slide, child: child),
           );
         },
-        child: KeyedSubtree(
-          key: ValueKey(_index),
-          child: _pages[_index],
-        ),
+        child: KeyedSubtree(key: ValueKey(_index), child: _pages[_index]),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
