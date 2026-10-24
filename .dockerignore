@@ -1,0 +1,14 @@
+.git
+.github
+.freebuff
+.devcontainer
+app
+docs
+tools
+scripts
+**/node_modules
+**/.dart_tool
+**/build
+server/dist
+*.log
+*.apk

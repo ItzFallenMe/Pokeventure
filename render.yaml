@@ -1,0 +1,18 @@
+# Render blueprint for the game server.
+# Dashboard → New → Blueprint → pick this repo. Render clones the
+# pokemon-showdown submodule automatically, then builds the Dockerfile.
+services:
+  - type: web
+    name: pokeventure-server
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # Render injects PORT; the server honors it. Set API_BASE_URL on the app
+      # side to this service's public https URL.
+      - key: NODE_ENV
+        value: production

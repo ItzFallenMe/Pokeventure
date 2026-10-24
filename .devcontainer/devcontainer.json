@@ -10,6 +10,5 @@
       ]
     }
   },
-
-  "postCreateCommand": "apt-get update && apt-get install -y nodejs npm && flutter pub get"
+  "postCreateCommand": "apt-get update && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs && cd app && flutter pub get"
 }

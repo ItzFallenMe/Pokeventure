@@ -1,0 +1,13 @@
+{
+  "name": "pokeventure-tools",
+  "private": true,
+  "type": "module",
+  "description": "Build-time tooling: dex snapshots and sprite sync.",
+  "scripts": {
+    "gen-data": "node gen-dex.mjs",
+    "gen-dex": "node gen-dex.mjs"
+  },
+  "dependencies": {
+    "@pkmn/dex": "^0.10.11"
+  }
+}
