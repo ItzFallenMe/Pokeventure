@@ -90,15 +90,16 @@ jobs:
         working-directory: app
 
       # Values come from the manual-run inputs when present, otherwise from
-      # repository variables (Settings → Secrets and variables → Actions →
-      # Variables): API_BASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY.
+      # repository secrets (Settings → Secrets and variables → Actions →
+      # Secrets): API_BASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY. Repository
+      # variables with the same names are accepted as a fallback.
       # Leave everything unset to build with local defaults and Social off.
       - name: Build APK
         working-directory: app
         env:
-          API_BASE_URL: ${{ inputs.api_base_url || vars.API_BASE_URL }}
-          SUPABASE_URL: ${{ inputs.supabase_url || vars.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ inputs.supabase_anon_key || vars.SUPABASE_ANON_KEY }}
+          API_BASE_URL: ${{ inputs.api_base_url || secrets.API_BASE_URL || vars.API_BASE_URL }}
+          SUPABASE_URL: ${{ inputs.supabase_url || secrets.SUPABASE_URL || vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ inputs.supabase_anon_key || secrets.SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY }}
         run: |
           flutter build apk --release \
             --dart-define=API_BASE_URL="$API_BASE_URL" \
