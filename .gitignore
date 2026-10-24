@@ -7,7 +7,8 @@ app/.dart_tool/
 app/.flutter-plugins-dependencies
 vendor/pokemon-showdown/node_modules/
 vendor/pokemon-showdown/dist/
-
+website/.next
+website/node_modules
 # Local configuration and secrets
 .env
 .env.*
